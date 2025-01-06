@@ -39,9 +39,9 @@ export default function SymbolPage() {
          <AdvancedChart data={chartData} rsiHeight={150} />
           {/* <ChartSection symbol={symbol} data={chartData} /> */}
         </div>
-        {/* <div className={styles.tabsArea}>
+        <div className={styles.tabsArea}>
           <TerminalTabs />
-        </div> */}
+        </div>
       </div>
 
       {/* RIGHT: Top (OrderBook + Watchlist tabs) and bottom (Buy/Sell) */}
