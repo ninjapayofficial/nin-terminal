@@ -48,6 +48,7 @@ async function UserOrLogin() {
           alt="NINtrade Logo"
           width={100}
           height={30}
+          priority={true}
         />
       </Link>
 

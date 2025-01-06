@@ -9,6 +9,7 @@ import OrderBook from "../components/OrderBook";
 import Watchlist from "../components/Watchlist";
 import BuySell from "../components/BuySell";
 import styles from "./symbolPage.module.css";
+import AdvancedChart from "../components/AdvancedChart";
 
 
 // No SymbolPageProps needed, we won't get 'params' from function args
@@ -29,17 +30,18 @@ export default function SymbolPage() {
 
     return (
     <div>
-      <h3>Symbol: {symbol}</h3>
-      <p>Chart data length: {chartData.length}</p>
+      {/* <h3>Symbol: {symbol}</h3>
+      <p>Chart data length: {chartData.length}</p> */}
       <div className={styles.container}>
       {/* LEFT: Chart, then the bottom TABS (Open Orders, Trade History, etc.) */}
       <div className={styles.leftPane}>
         <div className={styles.chartArea}>
-          <ChartSection symbol={symbol} data={chartData} />
+         <AdvancedChart data={chartData} rsiHeight={150} />
+          {/* <ChartSection symbol={symbol} data={chartData} /> */}
         </div>
-        <div className={styles.tabsArea}>
+        {/* <div className={styles.tabsArea}>
           <TerminalTabs />
-        </div>
+        </div> */}
       </div>
 
       {/* RIGHT: Top (OrderBook + Watchlist tabs) and bottom (Buy/Sell) */}
@@ -57,6 +59,9 @@ export default function SymbolPage() {
         </div>
       </div>
     </div>
+    <div className={styles.tabsArea}>
+          <TerminalTabs />
+        </div>
     </div>
   );
 }
