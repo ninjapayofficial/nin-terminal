@@ -1,0 +1,79 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #20252a;
+    color: #e0e0e0;
+  }
+  
+  .tabHeader {
+    display: flex;
+    gap: 0.5rem;
+    background: #151a1e;
+    padding: 0.5rem;
+  }
+  
+  .tab {
+    padding: 0.3rem 0.6rem;
+    background: #1e2429;
+    cursor: pointer;
+    color: #e0e0e0;
+  }
+  
+  .tab:hover {
+    background: #2a2f34;
+  }
+  
+  .activeTab {
+    background: #2f3336;
+  }
+  
+  .tabContent {
+    flex: 1;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .formRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .formRow label {
+    width: 60px;
+  }
+  
+  .formRow input {
+    flex: 1;
+    padding: 0.25rem;
+    background: #151a1e;
+    border: 1px solid #333;
+    color: #e0e0e0;
+  }
+  
+  .buttons {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: auto;
+  }
+  
+  .buyButton {
+    background: #16a085;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    color: #fff;
+  }
+  
+  .sellButton {
+    background: #c0392b;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    color: #fff;
+  }
+  

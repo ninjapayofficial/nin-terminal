@@ -1,28 +1,68 @@
-// app/components/Watchlist.tsx
 "use client";
+import React, { useState } from "react";
+import styles from "./Watchlist.module.css";
 
-import React from 'react';
+/** Three tabs at the top: Favorites, All Stocks, My Watchlist */
+const TABS = ["Favorites", "All Stocks", "Watchlist"];
 
-interface WatchlistItem {
-  symbol: string;
-  lastPrice: number;
-}
+// Mock data
+const favoritesData = [
+  { symbol: "BNB/USDT", price: 716.58 },
+  { symbol: "BTC/USDT", price: 27200 },
+];
+const allStocksData = [
+  { symbol: "PAYTM.NS", price: 560 },
+  { symbol: "TCS.NS", price: 3455 },
+  { symbol: "AAPL", price: 150.25 },
+  // etc.
+];
+const watchlistData = [
+  { symbol: "TSLA", price: 210 },
+  { symbol: "MSFT", price: 320 },
+];
 
-interface WatchlistProps {
-  data: WatchlistItem[];
-}
+export default function Watchlist() {
+  const [activeTab, setActiveTab] = useState(TABS[0]);
 
-export default function Watchlist({ data }: WatchlistProps) {
+  function renderTabContent() {
+    switch (activeTab) {
+      case "Favorites":
+        return favoritesData.map((item) => (
+          <div key={item.symbol}>
+            {item.symbol} - {item.price}
+          </div>
+        ));
+      case "All Stocks":
+        return allStocksData.map((item) => (
+          <div key={item.symbol}>
+            {item.symbol} - {item.price}
+          </div>
+        ));
+      case "Watchlist":
+        return watchlistData.map((item) => (
+          <div key={item.symbol}>
+            {item.symbol} - {item.price}
+          </div>
+        ));
+      default:
+        return null;
+    }
+  }
+
   return (
-    <div style={{ border: '1px solid #444', padding: 8, marginBottom: 8 }}>
-      <h3>Watchlist</h3>
-      <ul>
-        {data.map((item, idx) => (
-          <li key={idx}>
-            {item.symbol} - ${item.lastPrice}
-          </li>
+    <div className={styles.watchlistContainer}>
+      <div className={styles.tabHeader}>
+        {TABS.map((tab) => (
+          <div
+            key={tab}
+            className={`${styles.tab} ${tab === activeTab ? styles.active : ""}`}
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab}
+          </div>
         ))}
-      </ul>
+      </div>
+      <div className={styles.tabContent}>{renderTabContent()}</div>
     </div>
   );
 }

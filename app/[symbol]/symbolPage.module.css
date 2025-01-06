@@ -1,0 +1,63 @@
+.container {
+    display: grid;
+    grid-template-columns: 60% 40%;
+    gap: 1rem;
+    height: calc(100vh - 60px);
+    /* You might adjust height to fill the screen minus some top nav, etc. */
+    background: #0b0e11;
+    color: #e0e0e0;
+    overflow: hidden; /* so we can handle scrolling in sub-areas */
+  }
+  
+  .leftPane {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .chartArea {
+    flex: 1;
+    background: #151a1e;
+    margin-bottom: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* chart can fill this area */
+  }
+  
+  .tabsArea {
+    background: #1e2429;
+    height: 300px; /* or a dynamic size, up to you */
+    overflow-y: auto;
+  }
+  
+  .rightPane {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .topRight {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* orderbook + watchlist side by side */
+    gap: 0.5rem;
+    flex: 1;
+    background: #151a1e;
+  }
+  
+  .orderBook {
+    background: #20252a;
+    overflow-y: auto;
+  }
+  
+  .watchlist {
+    background: #20252a;
+    overflow-y: auto;
+  }
+  
+  .buySellArea {
+    background: #1e2429;
+    height: 300px; 
+    margin-top: 0.5rem;
+    overflow-y: auto;
+  }
+  

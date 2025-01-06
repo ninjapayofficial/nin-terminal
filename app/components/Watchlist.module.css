@@ -1,0 +1,33 @@
+.watchlistContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0.5rem;
+  }
+  
+  .tabHeader {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .tab {
+    padding: 0.3rem 0.6rem;
+    background: #1e2429;
+    cursor: pointer;
+    color: #e0e0e0;
+  }
+  
+  .tab:hover {
+    background: #2a2f34;
+  }
+  
+  .active {
+    background: #2f3336;
+  }
+  
+  .tabContent {
+    flex: 1;
+    overflow-y: auto;
+  }
+  
