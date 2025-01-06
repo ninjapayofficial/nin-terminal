@@ -1,3 +1,34 @@
+// app/components/Watchlist.tsx
+
+// "use client";
+
+// import React from 'react';
+
+// interface WatchlistItem {
+//   symbol: string;
+//   lastPrice: number;
+// }
+
+// interface WatchlistProps {
+//   data: WatchlistItem[];
+// }
+
+// export default function Watchlist({ data }: WatchlistProps) {
+//   return (
+//     <div style={{ border: '1px solid #444', padding: 8, marginBottom: 8 }}>
+//       <h3>Watchlist</h3>
+//       <ul>
+//         {data.map((item, idx) => (
+//           <li key={idx}>
+//             {item.symbol} - ${item.lastPrice}
+//           </li>
+//         ))}
+//       </ul>
+//     </div>
+//   );
+// }
+
+
 "use client";
 import React, { useState } from "react";
 import styles from "./Watchlist.module.css";
@@ -7,8 +38,8 @@ const TABS = ["Favorites", "All Stocks", "Watchlist"];
 
 // Mock data
 const favoritesData = [
-  { symbol: "BNB/USDT", price: 716.58 },
-  { symbol: "BTC/USDT", price: 27200 },
+  { symbol: "TATAM", price: 716.58 },
+  { symbol: "STEELX", price: 27200 },
 ];
 const allStocksData = [
   { symbol: "PAYTM.NS", price: 560 },
