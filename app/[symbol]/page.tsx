@@ -3,7 +3,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import ChartSection from "../components/ChartSection";
 import TerminalTabs from "../components/TerminalTabs";
 import OrderBook from "../components/OrderBook";
 import Watchlist from "../components/Watchlist";
