@@ -11,15 +11,13 @@ import BuySell from "../components/BuySell";
 import styles from "./symbolPage.module.css";
 import AdvancedChart from "../components/AdvancedChart";
 
-
-// No SymbolPageProps needed, we won't get 'params' from function args
 export default function SymbolPage() {
   const routeParams = useParams() as { symbol?: string };
-
-  // If no symbol is present, fallback to 'paytm.ns' in a single line
   const symbol = routeParams.symbol ?? "paytm.ns";
 
   const [chartData, setChartData] = useState<any[]>([]);
+  // State to open/close the chat drawer
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     fetch(`/api/chart?symbol=${symbol}`)
@@ -28,40 +26,68 @@ export default function SymbolPage() {
       .catch((err) => console.error("Error fetching chart data:", err));
   }, [symbol]);
 
-    return (
+  // Toggle the chat drawer
+  const handleChatClick = () => {
+    setDrawerOpen(!drawerOpen);
+  };
+
+  // Called when user clicks outside the drawer (overlay)
+  const handleOverlayClick = () => {
+    setDrawerOpen(false);
+  };
+
+  return (
     <div>
-      {/* <h3>Symbol: {symbol}</h3>
-      <p>Chart data length: {chartData.length}</p> */}
       <div className={styles.container}>
-      {/* LEFT: Chart, then the bottom TABS (Open Orders, Trade History, etc.) */}
-      <div className={styles.leftPane}>
-        <div className={styles.chartArea}>
-          <AdvancedChart data={chartData} symbol="PAYTM.NS" />
-          {/* <ChartSection symbol={symbol} data={chartData} /> */}
+        {/* LEFT: Chart + TABS */}
+        <div className={styles.leftPane}>
+          <div className={styles.chartArea}>
+            <AdvancedChart data={chartData} symbol="PAYTM.NS" />
+          </div>
+          <div className={styles.tabsArea}>
+            <TerminalTabs />
+          </div>
         </div>
-        <div className={styles.tabsArea}>
-          <TerminalTabs />
+
+        {/* RIGHT: (OrderBook + Watchlist) + (BuySell) */}
+        <div className={styles.rightPane}>
+          <div className={styles.topRight}>
+            <div className={styles.orderBook}>
+              <OrderBook />
+            </div>
+            <div className={styles.watchlist}>
+              <Watchlist />
+            </div>
+          </div>
+          <div className={styles.buySellArea}>
+            <BuySell symbol={symbol} />
+          </div>
         </div>
       </div>
 
-      {/* RIGHT: Top (OrderBook + Watchlist tabs) and bottom (Buy/Sell) */}
-      <div className={styles.rightPane}>
-        <div className={styles.topRight}>
-          <div className={styles.orderBook}>
-            <OrderBook />
-          </div>
-          <div className={styles.watchlist}>
-            <Watchlist />
-          </div>
-        </div>
-        <div className={styles.buySellArea}>
-          <BuySell symbol={symbol} />
-        </div>
+      {/* Additional TABS below, if needed */}
+      <div className={styles.tabsArea}>
+        <TerminalTabs />
       </div>
-    </div>
-    <div className={styles.tabsArea}>
-          <TerminalTabs />
-        </div>
+
+      {/* ===== FLOATING CHAT BUTTON ===== */}
+      <button className={styles.chatButton} onClick={handleChatClick}>
+        Bot
+      </button>
+
+      {/* ===== OVERLAY for outside-click ===== */}
+      {drawerOpen && (
+        <div className={styles.overlay} onClick={handleOverlayClick}></div>
+      )}
+
+      {/* ===== SIDE DRAWER with IFRAME ===== */}
+      <div className={`${styles.drawer} ${drawerOpen ? styles.drawerOpen : ""}`}>
+        <iframe
+          src="https://stockbot.nin.in/"
+          className={styles.iframeContainer}
+          title="StockBot Chat"
+        ></iframe>
+      </div>
     </div>
   );
 }
