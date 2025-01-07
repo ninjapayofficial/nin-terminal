@@ -65,10 +65,14 @@
   /* =========== FLOATING CHAT BUTTON =========== */
   .chatButton {
     position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     bottom: 20px;
     right: 20px;
     background: #88a1ac;
     border: 2px solid #5f6f7687;
+    box-shadow: 0px 2px 8px #88a1ac56;
     color: #fff;
     border-radius: 50%;
     width: 50px;
@@ -76,6 +80,21 @@
     cursor: pointer;
     font-size: 16px;
     z-index: 9999; /* below the drawer, but above page content */
+  }
+
+  .chatButton:hover {
+    background-color: #00a1b3; /* Hover color */
+    transform: scale(1.1); /* Slightly enlarge on hover */
+  }
+  
+  .chatButton:active {
+    transform: scale(0.95); /* Slightly shrink on click */
+  }
+
+  .chatButton svg {
+    width: 28px; /* Size of the SVG */
+    height: 28px;
+    fill: none; /* Use stroke or styles defined in SVG */
   }
 
   /* =========== OVERLAY =========== */
