@@ -2,8 +2,10 @@
   "name": "out",
   "version": "0.1.0",
   "private": true,
+  "lint": "next lint",
+  "lint:fix": "next lint --fix",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

@@ -400,7 +400,7 @@ function calculateRSI(candles: Candle[], period: number) {
   if (candles.length < period) {
     return candles.map((c) => ({ time: c.time as unknown as UTCTimestamp, value: NaN }));
   }
-  let rsi: Array<{ time: UTCTimestamp; value: number }> = [];
+  const rsi: Array<{ time: UTCTimestamp; value: number }> = [];
   let gains = 0;
   let losses = 0;
 
@@ -412,7 +412,7 @@ function calculateRSI(candles: Candle[], period: number) {
   let avgGain = gains / period;
   let avgLoss = losses / period;
   let rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
-  let firstRSI = 100 - 100 / (1 + rs);
+  const firstRSI = 100 - 100 / (1 + rs);
 
   rsi.push({
     time: candles[period].time as unknown as UTCTimestamp,

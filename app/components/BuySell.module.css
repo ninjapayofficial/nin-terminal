@@ -57,22 +57,26 @@
   
   .buttons {
     display: flex;
+    width: 100%;
     justify-content: space-evenly;
+    gap: 0.5rem;
     margin-top: auto;
     padding: 2rem;
   }
   
   .buyButton {
-    background: #16a085;
-    border: none;
+    /* background: #16a085; */
+    border: 1px solid #16a085;
+    width: 100%;
     padding: 0.5rem 1rem;
     cursor: pointer;
     color: #fff;
   }
   
   .sellButton {
-    background: #c0392b;
-    border: none;
+    /* background: #c0392b; */
+    border: 1px solid #c0392b;
+    width: 100%;
     padding: 0.5rem 1rem;
     cursor: pointer;
     color: #fff;
