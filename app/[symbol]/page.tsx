@@ -36,7 +36,7 @@ export default function SymbolPage() {
       {/* LEFT: Chart, then the bottom TABS (Open Orders, Trade History, etc.) */}
       <div className={styles.leftPane}>
         <div className={styles.chartArea}>
-         <AdvancedChart data={chartData} rsiHeight={150} />
+          <AdvancedChart data={chartData} symbol="PAYTM.NS" />
           {/* <ChartSection symbol={symbol} data={chartData} /> */}
         </div>
         <div className={styles.tabsArea}>
