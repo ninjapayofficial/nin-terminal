@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import styles from "./TerminalTabs.module.css";
 
-const TABS = ["Open Orders", "Order History", "Trade History", "Funds"];
+const TABS = ["Open Orders", "Order History", "Trade History", "Holdings"];
 
 export default function TerminalTabs() {
   const [activeTab, setActiveTab] = useState<string>(TABS[0]);
@@ -16,7 +16,7 @@ export default function TerminalTabs() {
         return <div>Order history data goes here...</div>;
       case "Trade History":
         return <div>Trade history data goes here...</div>;
-      case "Funds":
+      case "Holdings":
         return <div>Funds or balances data goes here...</div>;
       default:
         return null;

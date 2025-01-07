@@ -1,7 +1,7 @@
 // app/components/AdvancedChart.tsx
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
   createChart,
   IChartApi,
@@ -12,7 +12,7 @@ import {
 } from "lightweight-charts";
 
 interface Candle {
-  time: string;  // e.g. 'YYYY-MM-DD'
+  time: string; 
   open: number;
   high: number;
   low: number;
@@ -21,10 +21,10 @@ interface Candle {
 }
 
 interface AdvancedChartProps {
-  data: Candle[];      // Candlestick data
-  symbol?: string;     // Optional symbol, if you want to display or use it
-  mainRatio?: number;  // (Optional) fraction of vertical space for main chart. Default 70.
-  rsiRatio?: number;   // (Optional) fraction of vertical space for RSI. Default 30.
+  data: Candle[];
+  symbol?: string;
+  mainRatio?: number;
+  rsiRatio?: number;
 }
 
 export default function AdvancedChart({
@@ -33,14 +33,13 @@ export default function AdvancedChart({
   mainRatio = 70,
   rsiRatio = 30,
 }: AdvancedChartProps) {
-  // Refs to the DOM elements
+  // Refs
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // We create two sub-containers:
   const mainChartContainer = useRef<HTMLDivElement>(null);
   const rsiChartContainer = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
 
-  // References to chart objects
+
   const mainChartRef = useRef<IChartApi | null>(null);
   const mainSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
@@ -48,26 +47,28 @@ export default function AdvancedChart({
   const rsiChartRef = useRef<IChartApi | null>(null);
   const rsiLineSeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
 
-  // --------------------
-  // Chart Creation
-  // --------------------
+  // Popup states
+  const [actionsVisible, setActionsVisible] = useState(false);
+  const [popupVisible, setPopupVisible] = useState(false); // We'll hide it on container mouseleave
+  const [popupX, setPopupX] = useState(0);
+  const [popupY, setPopupY] = useState(0);
+  const [lastPrice, setLastPrice] = useState<number | null>(null);
+  const [price, setPrice] = useState<number | null>(null);
+  const [percentChange, setPercentChange] = useState<string>("");
+
+  // 1) Create charts on mount
   useEffect(() => {
     if (!mainChartContainer.current || !rsiChartContainer.current) return;
 
-    // 1) Create MAIN chart if not already
+    // MAIN chart
     if (!mainChartRef.current) {
       mainChartRef.current = createChart(mainChartContainer.current, {
         layout: {
           background: { color: "#0b0e11" },
           textColor: "#e0e0e0",
         },
-        timeScale: {
-          borderColor: "#2f3336",
-          barSpacing: 8,
-        },
-        rightPriceScale: {
-          borderColor: "#2f3336",
-        },
+        timeScale: { borderColor: "#2f3336", barSpacing: 8 },
+        rightPriceScale: { borderColor: "#2f3336" },
         grid: {
           vertLines: { color: "#2f3336", style: 1 },
           horzLines: { color: "#2f3336", style: 1 },
@@ -89,7 +90,6 @@ export default function AdvancedChart({
         },
       });
 
-      // Add candlestick
       mainSeriesRef.current = mainChartRef.current.addCandlestickSeries({
         upColor: "#2DBD85",
         downColor: "#F6465D",
@@ -98,8 +98,6 @@ export default function AdvancedChart({
         wickUpColor: "#26a69a",
         wickDownColor: "#ef5350",
       });
-
-      // Add volume histogram
       volumeSeriesRef.current = mainChartRef.current.addHistogramSeries({
         priceScaleId: "",
         priceFormat: { type: "volume" },
@@ -109,58 +107,116 @@ export default function AdvancedChart({
       });
     }
 
-    // 2) Create RSI chart if not already
+    // RSI chart
     if (!rsiChartRef.current) {
       rsiChartRef.current = createChart(rsiChartContainer.current, {
-        layout: {
-          background: { color: "#0b0e11" },
-          textColor: "#e0e0e0",
-        },
-        timeScale: {
-          borderColor: "#2f3336",
-        },
-        rightPriceScale: {
-          borderColor: "#2f3336",
-        },
+        layout: { background: { color: "#0b0e11" }, textColor: "#e0e0e0" },
+        timeScale: { borderColor: "#2f3336" },
+        rightPriceScale: { borderColor: "#2f3336" },
         grid: {
           vertLines: { color: "#2f3336", style: 1 },
           horzLines: { color: "#2f3336", style: 1 },
         },
         crosshair: {
           mode: CrosshairMode.Normal,
-          vertLine: { visible: true, style: 2, color: "#9194a3", labelVisible: false },
-          horzLine: { visible: true, style: 2, color: "#9194a3", labelVisible: false },
+          vertLine: {
+            visible: true,
+            style: 2,
+            color: "#9194a3",
+            labelVisible: false,
+          },
+          horzLine: {
+            visible: true,
+            style: 2,
+            color: "#9194a3",
+            labelVisible: false,
+          },
         },
       });
-
-      // RSI line
       rsiLineSeriesRef.current = rsiChartRef.current.addLineSeries({
         color: "#ff9900",
         lineWidth: 2,
       });
     }
 
-    // 3) Sync time scales
+    // Sync
     syncTimeScale(mainChartRef.current, rsiChartRef.current);
 
-    // 4) Initial resize to fit parent's size
-    handleResize();
+    // If we have data, set lastPrice
+    if (data.length > 0) {
+      const lastCandle = data[data.length - 1];
+      setLastPrice(lastCandle.close);
+    }
 
-    // 5) Listen for window resizes
+    // Initial resize
+    handleResize();
     window.addEventListener("resize", handleResize);
+
+    // CROSSHAIR: we do NOT hide on param.point=null
+    // we only hide the popup on container's mouseleave
+    if (mainChartRef.current && mainSeriesRef.current) {
+      mainChartRef.current.subscribeCrosshairMove((param) => {
+        // If param.point is null => user is outside the main candle area or scale
+        // => in old code we might hide, but we won't do that here
+        if (!param.point) {
+          // do nothing (i.e. keep the popup in place)
+          return;
+        }
+
+        // Ensure popup is visible if inside container
+        setPopupVisible(true);
+
+        // Y => price
+        const currentPrice = mainSeriesRef.current!.coordinateToPrice(
+          param.point.y
+        );
+        if (currentPrice == null) return; // no update
+        setPrice(currentPrice);
+
+        // % from last
+        if (lastPrice != null && lastPrice !== 0) {
+          const pc = ((currentPrice - lastPrice) / lastPrice) * 100;
+          const sign = pc >= 0 ? "+" : "";
+          setPercentChange(`(${sign}${pc.toFixed(2)}%)`);
+        } else {
+          setPercentChange("");
+        }
+
+        // Position near right side
+        const chartW = mainChartContainer.current!.clientWidth;
+        const popupW = 200;
+        const x = chartW - popupW - 10;
+        const popupHeight = popupRef.current ? popupRef.current.offsetHeight : 60; // Fallback to default
+        const y = param.point.y - popupHeight / 2;
+        setPopupX(x);
+        setPopupY(y);
+      });
+    }
+
+    // MOUSE EVENTS ON CONTAINER:
+    // - Hide on mouseleave
+    const containerEl = containerRef.current;
+    if (containerEl) {
+      containerEl.addEventListener("mouseleave", onMouseLeave);
+      containerEl.addEventListener("mouseenter", onMouseEnter);
+    }
+
     return () => {
       window.removeEventListener("resize", handleResize);
+      if (containerEl) {
+        containerEl.removeEventListener("mouseleave", onMouseLeave);
+        containerEl.removeEventListener("mouseenter", onMouseEnter);
+      }
     };
-  }, []);
+  }, [data, lastPrice]);
 
-  // --------------------
-  // Chart Data Updates
-  // --------------------
+  // 2) Data updates => set chart data
   useEffect(() => {
     if (!data.length) return;
-    if (!mainSeriesRef.current || !volumeSeriesRef.current || !rsiLineSeriesRef.current) return;
+    if (!mainSeriesRef.current || !volumeSeriesRef.current || !rsiLineSeriesRef.current)
+      return;
 
-    // 1) Candlesticks
+    // Candles
     const candleData = data.map((d) => ({
       time: d.time as unknown as UTCTimestamp,
       open: d.open,
@@ -170,95 +226,184 @@ export default function AdvancedChart({
     }));
     mainSeriesRef.current.setData(candleData);
 
-    // 2) Volume
-    const volumeData = data.map((d) => ({
+    // Volume
+    const volData = data.map((d) => ({
       time: d.time as unknown as UTCTimestamp,
       value: d.volume,
       color: d.close > d.open ? "#2DBD85" : "#F6465D",
     }));
-    volumeSeriesRef.current.setData(volumeData);
+    volumeSeriesRef.current.setData(volData);
 
-    // 3) RSI
-    const rsiPoints = calculateRSI(data, 14);
-    rsiLineSeriesRef.current.setData(rsiPoints);
-
-    // Overbought / Oversold lines
+    // RSI
+    const rsiPts = calculateRSI(data, 14);
+    rsiLineSeriesRef.current.setData(rsiPts);
     addHorizontalLine(rsiChartRef.current, 70, "#ff0000", data);
     addHorizontalLine(rsiChartRef.current, 30, "#00ff00", data);
-
   }, [data]);
 
-  // --------------------
-  // Resize Handler
-  // --------------------
+  // 3) Resize
   function handleResize() {
-    if (!containerRef.current) return;
-    if (!mainChartContainer.current || !rsiChartContainer.current) return;
-    if (!mainChartRef.current || !rsiChartRef.current) return;
-
-    // The entire container's height
-    const totalHeight = containerRef.current.clientHeight;
-    const totalWidth = containerRef.current.clientWidth;
-
-    // We'll split the container vertically by mainRatio vs. rsiRatio
-    const ratioSum = mainRatio + rsiRatio;
-    const mainHeight = Math.floor((mainRatio / ratioSum) * totalHeight);
-    const rsiHeight = totalHeight - mainHeight; // remainder
-
-    // Apply new sizes
-    mainChartRef.current.applyOptions({
-      width: totalWidth,
-      height: mainHeight,
-    });
-    rsiChartRef.current.applyOptions({
-      width: totalWidth,
-      height: rsiHeight,
-    });
+    if (!containerRef.current || !mainChartRef.current || !rsiChartRef.current)
+      return;
+    const totalH = containerRef.current.clientHeight;
+    const totalW = containerRef.current.clientWidth;
+    const sum = mainRatio + rsiRatio;
+    const mh = Math.floor((mainRatio / sum) * totalH);
+    const rh = totalH - mh;
+    mainChartRef.current.applyOptions({ width: totalW, height: mh });
+    rsiChartRef.current.applyOptions({ width: totalW, height: rh });
   }
+
+  // 4) Container-level mouse events
+  function onMouseLeave() {
+    setPopupVisible(false); // Only hide if truly leaving container
+  }
+  function onMouseEnter() {
+    // If we want to show the popup again as soon as they re-enter, we can do so
+    // but typically we'll let crosshair move event handle it
+    // setPopupVisible(true);
+  }
+
+  // 5) The “+ button => buy/sell/draw” toggles
+  function toggleActions() {
+    setActionsVisible(!actionsVisible);
+  }
+
+  function handleBuy() {
+    if (price == null) return;
+    alert(`Buy at $${price.toFixed(2)}`);
+  }
+
+  function handleSell() {
+    if (price == null) return;
+    alert(`Sell at $${price.toFixed(2)}`);
+  }
+
+  function handleDraw() {
+    if (!data.length || price == null || !mainChartRef.current) return;
+    const lineSeries = mainChartRef.current.addLineSeries({
+      color: "#ffffff",
+      lineWidth: 1,
+    });
+    const firstTime = data[0].time as unknown as UTCTimestamp;
+    const lastTime = data[data.length - 1].time as unknown as UTCTimestamp;
+    lineSeries.setData([
+      { time: firstTime, value: price },
+      { time: lastTime, value: price },
+    ]);
+    alert(`Horizontal line drawn at $${price.toFixed(2)}`);
+  }
+
+  // Popup style
+  const popupStyle: React.CSSProperties = {
+    position: "absolute",
+    left: popupX + 100,
+    top: popupY,
+    // width: 150,
+    background: "#c6dfeaf6",
+    border: "1px solid #00000017",
+    borderRadius: 5,
+    boxShadow: "0 2px 8px rgba(166, 206, 219, 0.5)",
+    display: popupVisible ? "flex" : "none",
+    flexDirection: "row",
+    alignItems: "center",
+    padding: "5px",
+    zIndex: 9999,
+    pointerEvents: popupVisible ? "auto" : "none",
+  };
 
   return (
     <div
       ref={containerRef}
       style={{
+        position: "relative",
         width: "100%",
         height: "100%",
         display: "flex",
         flexDirection: "column",
       }}
     >
-      {/* If you want to display the symbol somewhere */}
-      {/* {symbol && (
-        <div style={{ padding: "0.2rem 0", background: "#222" }}>
-          Symbol: {symbol}
-        </div>
-      )} */}
-
-      {/* The main chart and RSI sub-containers fill the rest */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        {/* We just place two placeholders; we size them in handleResize */}
         <div ref={mainChartContainer} style={{ flexShrink: 0 }} />
         <div ref={rsiChartContainer} style={{ flexShrink: 0, marginTop: 8 }} />
+      </div>
+
+      {/* Popup (like Node plugin) */}
+      <div ref={popupRef} style={popupStyle}>
+        <button
+          onClick={toggleActions}
+          style={{
+            background: "#88a1ac",
+            color: "#fff",
+            width: 18,
+            height: 18,
+            borderRadius: "50%",
+            textAlign: "center",
+            padding: 0,
+            fontSize: 12,
+            lineHeight: "18px",
+            cursor: "pointer",
+            border: "none",
+            marginRight: 5,
+          }}
+        >
+          +
+        </button>
+
+        {actionsVisible && (
+          <div style={{ display: "flex", flexDirection: "column", marginRight: 6 }}>
+            <button
+              style={{ marginBottom: 5, background: "#16a085", color: "#fff" }}
+              onClick={handleBuy}
+            >
+              Buy
+            </button>
+            <button
+              style={{ marginBottom: 5, background: "#c0392b", color: "#fff" }}
+              onClick={handleSell}
+            >
+              Sell
+            </button>
+            <button
+              style={{ background: "#2980b9", color: "#fff" }}
+              onClick={handleDraw}
+            >
+              Draw
+            </button>
+          </div>
+        )}
+
+        <p style={{ margin: 0, fontSize: 10, color: "#000" }}>
+          {price ? `${price.toFixed(2)}` : ""}
+          {percentChange ? (
+            <>
+              {" "}
+              <span
+                style={{
+                  color: percentChange.startsWith("(+") ? "#16a085" : "#c0392b",
+                }}
+              >
+                {percentChange}
+              </span>
+            </>
+          ) : null}
+        </p>
       </div>
     </div>
   );
 }
 
-/* =======================================
+/* ===============================
    HELPER FUNCTIONS
-======================================= */
-
+=============================== */
 function calculateRSI(candles: Candle[], period: number) {
-  // Returns an array of { time, value } for RSI
   if (candles.length < period) {
     return candles.map((c) => ({ time: c.time as unknown as UTCTimestamp, value: NaN }));
   }
-
   let rsi: Array<{ time: UTCTimestamp; value: number }> = [];
-
   let gains = 0;
   let losses = 0;
 
-  // Initialize average gains/losses
   for (let i = 1; i <= period; i++) {
     const change = candles[i].close - candles[i - 1].close;
     if (change > 0) gains += change;
@@ -274,7 +419,6 @@ function calculateRSI(candles: Candle[], period: number) {
     value: firstRSI,
   });
 
-  // Subsequent RSI values
   for (let i = period + 1; i < candles.length; i++) {
     const change = candles[i].close - candles[i - 1].close;
     if (change > 0) {
@@ -286,14 +430,9 @@ function calculateRSI(candles: Candle[], period: number) {
     }
     rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
     const curRSI = 100 - 100 / (1 + rs);
-
-    rsi.push({
-      time: candles[i].time as unknown as UTCTimestamp,
-      value: curRSI,
-    });
+    rsi.push({ time: candles[i].time as unknown as UTCTimestamp, value: curRSI });
   }
 
-  // Fill with NaN for the first `period` bars
   const result: Array<{ time: UTCTimestamp; value: number }> = [];
   for (let i = 0; i < candles.length; i++) {
     if (i < period) {
@@ -324,27 +463,22 @@ function addHorizontalLine(
   ]);
 }
 
-// Synchronize time scale between two charts
 function syncTimeScale(chartA: IChartApi | null, chartB: IChartApi | null) {
   if (!chartA || !chartB) return;
-
   const tsA = chartA.timeScale();
   const tsB = chartB.timeScale();
-
   let isSyncingA = false;
   let isSyncingB = false;
 
   tsA.subscribeVisibleLogicalRangeChange((range) => {
-    if (isSyncingB) return;
-    if (!range) return;
+    if (isSyncingB || !range) return;
     isSyncingA = true;
     tsB.setVisibleLogicalRange(range);
     isSyncingA = false;
   });
 
   tsB.subscribeVisibleLogicalRangeChange((range) => {
-    if (isSyncingA) return;
-    if (!range) return;
+    if (isSyncingA || !range) return;
     isSyncingB = true;
     tsA.setVisibleLogicalRange(range);
     isSyncingB = false;

@@ -44,7 +44,7 @@ async function UserOrLogin() {
     <>
       <Link href="https://nin.in/trade/" rel="nofollow">
         <Image
-          src="/logo_trade_light.svg"
+          src="/logo_trade_light_baseline.svg"
           alt="NINtrade Logo"
           width={100}
           height={30}
@@ -62,7 +62,7 @@ async function UserOrLogin() {
           className="text-gray-700 hover:underline"
           style={{ borderRadius: 0, padding: '4px' }}
         >
-          <span className="flex">Start New Chat</span>
+          <span className="flex">New Chart</span>
         </a>
       </div>
     </>
