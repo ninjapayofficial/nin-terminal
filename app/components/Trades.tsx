@@ -1,19 +1,19 @@
 // app/components/Trades.tsx
-"use client";
+'use client'
 
-import React from 'react';
+import React from 'react'
 
-type SideType = 'BUY' | 'SELL';
+type SideType = 'BUY' | 'SELL'
 
 interface Trade {
-  time: string;  // e.g. "2023-01-01 09:30:00"
-  side: SideType;
-  price: number;
-  size: number;
+  time: string // e.g. "2023-01-01 09:30:00"
+  side: SideType
+  price: number
+  size: number
 }
 
 interface TradesProps {
-  data: Trade[];
+  data: Trade[]
 }
 
 export default function Trades({ data }: TradesProps) {
@@ -41,5 +41,5 @@ export default function Trades({ data }: TradesProps) {
         </tbody>
       </table>
     </div>
-  );
+  )
 }

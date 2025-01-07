@@ -1,32 +1,32 @@
 // app/components/OrderBook.tsx
-"use client";
-import React, { useEffect, useState } from "react";
+'use client'
+import React, { useEffect, useState } from 'react'
 
 interface OrderItem {
-  price: number;
-  size: number;
+  price: number
+  size: number
 }
 
 interface OrderBookData {
-  bids: OrderItem[];
-  asks: OrderItem[];
+  bids: OrderItem[]
+  asks: OrderItem[]
 }
 
 export default function OrderBook() {
-  const [data, setData] = useState<OrderBookData>({ bids: [], asks: [] });
+  const [data, setData] = useState<OrderBookData>({ bids: [], asks: [] })
 
   useEffect(() => {
     // Example: fetch from /api/orderbook
-    fetch("/api/orderbook")
-      .then((res) => res.json())
-      .then((ob) => setData(ob))
-      .catch((err) => console.error("Orderbook fetch error:", err));
-  }, []);
+    fetch('/api/orderbook')
+      .then(res => res.json())
+      .then(ob => setData(ob))
+      .catch(err => console.error('Orderbook fetch error:', err))
+  }, [])
 
   return (
-    <div style={{ padding: "0.5rem" }}>
+    <div style={{ padding: '0.5rem' }}>
       <h4>Order Book</h4>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <div>
           <strong>Bids</strong>
           {data.bids.map((bid, idx) => (
@@ -45,5 +45,5 @@ export default function OrderBook() {
         </div>
       </div>
     </div>
-  );
+  )
 }
