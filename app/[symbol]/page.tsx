@@ -9,6 +9,8 @@ import Watchlist from '../components/Watchlist'
 import BuySell from '../components/BuySell'
 import styles from './symbolPage.module.css'
 import AdvancedChart from '../components/AdvancedChart'
+import GridLayout from 'react-grid-layout'
+
 
 export default function SymbolPage() {
   const routeParams = useParams() as { symbol?: string }
@@ -35,34 +37,80 @@ export default function SymbolPage() {
     setDrawerOpen(false)
   }
 
+  const layout = [
+    // Left side (Chart)
+    { i: 'chartArea',   x: 0, y: 0,  w: 8, h: 10 },
+  
+    // Left side (Tabs below chart)
+    { i: 'tabsAreaTop', x: 0, y: 10, w: 8, h: 4 },
+  
+    // Right side (OrderBook - top)
+    { i: 'orderBook',   x: 8, y: 0,  w: 4, h: 6 },
+  
+    // Right side (Watchlist - middle)
+    { i: 'watchlist',   x: 8, y: 6,  w: 4, h: 4 },
+  
+    // Right side (Buy/Sell - bottom)
+    { i: 'buySell',     x: 8, y: 10, w: 4, h: 4 },
+  
+    // Entire bottom area (Tabs)
+    { i: 'tabsAreaBottom', x: 0, y: 14, w: 12, h: 4 },
+  ]
+
+  const [gridWidth, setGridWidth] = useState<number>(1200);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setGridWidth(window.innerWidth);
+      // optionally listen for resize:
+      window.addEventListener('resize', () => {
+        setGridWidth(window.innerWidth);
+      });
+    }
+  }, []);
+  
+
   return (
     <div>
-      <div className={styles.container}>
-        {/* LEFT: Chart + TABS */}
-        <div className={styles.leftPane}>
-          <div className={styles.chartArea}>
-            <AdvancedChart data={chartData} symbol="PAYTM.NS" />
-          </div>
-          <div className={styles.tabsArea}>
-            <TerminalTabs />
-          </div>
+      <GridLayout
+        className="layout"
+        layout={layout}       // the array we defined above
+        cols={12}             // 12 columns
+        rowHeight={30}        // each grid row is 30px tall
+        width={gridWidth}     // total width in px - adjust for your design
+        draggableHandle=".myDragHandle" /* Optional: if you want a handle */
+      >
+        {/* CHART area */}
+        <div key="chartArea" className={styles.chartArea}>
+          <AdvancedChart data={chartData} symbol="PAYTM.NS" />
         </div>
 
-        {/* RIGHT: (OrderBook + Watchlist) + (BuySell) */}
-        <div className={styles.rightPane}>
-          <div className={styles.topRight}>
-            <div className={styles.orderBook}>
-              <OrderBook />
-            </div>
-            <div className={styles.watchlist}>
-              <Watchlist />
-            </div>
-          </div>
-          <div className={styles.buySellArea}>
-            <BuySell symbol={symbol} />
-          </div>
+        {/* TABS area (top) */}
+        <div key="tabsAreaTop" className={styles.tabsArea}>
+          <TerminalTabs />
         </div>
-      </div>
+
+        {/* ORDER BOOK */}
+        <div key="orderBook" className={styles.orderBook}>
+          <OrderBook />
+        </div>
+
+        {/* WATCHLIST */}
+        <div key="watchlist" className={styles.watchlist}>
+          <Watchlist />
+        </div>
+
+        {/* BUY/SELL */}
+        <div key="buySell" className={styles.buySellArea}>
+          <BuySell symbol={symbol} />
+        </div>
+
+        {/* optional TABS at bottom */}
+        {/* <div key="tabsAreaBottom" className={styles.tabsArea}>
+          <TerminalTabs />
+        </div> */}
+      </GridLayout>
+
 
       {/* Additional TABS below, if needed */}
       <div className={styles.tabsArea}>

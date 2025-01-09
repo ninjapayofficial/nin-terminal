@@ -1,13 +1,21 @@
-.container {
+/* .container {
     display: grid;
     grid-template-columns: 60% 40%;
     gap: 0.5rem;
     height: calc(100vh - 60px);
-    /* You might adjust height to fill the screen minus some top nav, etc. */
+
     background: #0b0e11;
     color: #e0e0e0;
-    overflow: hidden; /* so we can handle scrolling in sub-areas */
+    overflow: hidden;
+  } */
+
+  .container {
+    height: calc(100vh - 60px);
+    background: #0b0e11;
+    color: #e0e0e0;
+    /* Keep any padding/margin if you want, but no 'display: grid' or 'overflow: hidden' */
   }
+  
   
   .leftPane {
     display: flex;
