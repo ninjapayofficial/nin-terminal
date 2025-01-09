@@ -65,7 +65,7 @@
   .buySellArea {
     background: #1e2429;
     height: 300px; 
-    margin-top: 0.5rem;
+    /* margin-top: 0.5rem; */
     overflow-y: auto;
   }
   
