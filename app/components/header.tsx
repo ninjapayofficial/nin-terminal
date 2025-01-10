@@ -63,7 +63,7 @@ async function UserOrLogin() {
           className="text-gray-700 hover:underline"
           style={{ borderRadius: 0, padding: '4px' }}
         >
-          <span className="flex">New Chart</span>
+          <span className="flex">New Widget</span>
         </Link>
       </div>
     </>
