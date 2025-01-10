@@ -30,12 +30,14 @@
     display: flex;
     flex-direction: column;
     overflow: hidden; /* chart can fill this area */
+    border-radius: 7px;
   }
   
   .tabsArea {
     background: #1e2429;
     height: 300px; /* or a dynamic size, up to you */
     overflow-y: auto;
+    border-radius: 7px;
   }
   
   .rightPane {
@@ -55,17 +57,25 @@
   .orderBook {
     background: #20252a;
     overflow-y: auto;
+    border-radius: 7px;
   }
   
   .watchlist {
     background: #20252a;
     overflow-y: auto;
+    border-radius: 7px;
   }
   
   .buySellArea {
     background: #1e2429;
     height: 300px; 
-    /* margin-top: 0.5rem; */
+    overflow-y: auto;
+    border-radius: 7px;
+  }
+
+  .pluginTabs {
+    background: #1e2429;
+    height: 300px; /* or a dynamic size, up to you */
     overflow-y: auto;
   }
   

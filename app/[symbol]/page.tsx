@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import TerminalTabs from '../components/TerminalTabs'
+import PluginTabs from '../components/PluginTabs'
 import OrderBook from '../components/OrderBook'
 import Watchlist from '../components/Watchlist'
 import BuySell from '../components/BuySell'
@@ -87,7 +88,7 @@ export default function SymbolPage() {
 
         {/* TABS area (top) */}
         <div key="tabsAreaTop" className={styles.tabsArea}>
-          <TerminalTabs />
+          <PluginTabs />
         </div>
 
         {/* ORDER BOOK */}
@@ -113,7 +114,7 @@ export default function SymbolPage() {
 
 
       {/* Additional TABS below, if needed */}
-      <div className={styles.tabsArea}>
+      <div className={styles.pluginTabs}>
         <TerminalTabs />
       </div>
 
