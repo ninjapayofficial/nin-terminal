@@ -81,6 +81,12 @@ export default function SymbolPage() {
         rowHeight={30}        // each grid row is 30px tall
         width={gridWidth}     // total width in px - adjust for your design
         draggableHandle=".myDragHandle" /* Optional: if you want a handle */
+        // Add the following props to make GridLayout responsive to its container
+        isResizable={true}
+        isDraggable={false} // Set to true if you want draggable items
+        // Optionally, set margins and container padding as needed
+        margin={[7, 7]}
+        containerPadding={[7, 7]}
       >
         {/* CHART area */}
         <div key="chartArea" className={styles.chartArea}>

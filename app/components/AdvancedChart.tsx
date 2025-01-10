@@ -149,7 +149,8 @@ export default function AdvancedChart({
 
     // Initial resize
     handleResize()
-    window.addEventListener('resize', handleResize)
+    // Remove window resize listener since we'll use ResizeObserver instead
+    // window.addEventListener('resize', handleResize)
 
     // CROSSHAIR: we do NOT hide on param.point=null
     // we only hide the popup on container's mouseleave
@@ -202,11 +203,20 @@ export default function AdvancedChart({
       containerEl.addEventListener('mouseenter', onMouseEnter)
     }
 
+    // 6. **Add ResizeObserver**
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize()
+    })
+    if (containerEl) {
+      resizeObserver.observe(containerEl)
+    }
+
     return () => {
-      window.removeEventListener('resize', handleResize)
+      // window.removeEventListener('resize', handleResize)
       if (containerEl) {
         containerEl.removeEventListener('mouseleave', onMouseLeave)
         containerEl.removeEventListener('mouseenter', onMouseEnter)
+        resizeObserver.unobserve(containerEl)
       }
     }
   }, [data, lastPrice])
@@ -257,6 +267,8 @@ export default function AdvancedChart({
     const rh = totalH - mh
     mainChartRef.current.applyOptions({ width: totalW, height: mh })
     rsiChartRef.current.applyOptions({ width: totalW, height: rh })
+    mainChartRef.current.timeScale().fitContent()
+    rsiChartRef.current.timeScale().fitContent()
   }
 
   // 4) Container-level mouse events
@@ -329,7 +341,7 @@ export default function AdvancedChart({
       }}
     >
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div ref={mainChartContainer} style={{ flexShrink: 0 }} />
+        <div ref={mainChartContainer} style={{ flex: 1 }} /> {/* Make it flexible */}
         <div ref={rsiChartContainer} style={{ flexShrink: 0, marginTop: 8 }} />
       </div>
 
