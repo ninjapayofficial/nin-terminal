@@ -149,3 +149,12 @@
     height: 100%;
     border: none;
   }
+
+  .myDragHandle {
+    background-color: #1e2429;
+    padding: 5px;
+    cursor: move;
+    color: #fff;
+    text-align: center;
+  }
+  
