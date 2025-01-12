@@ -144,7 +144,7 @@
 //         layout={layout}
 //         onDrop={onDrop}
 //         isDroppable={true}
-//         droppingItem={{ w: 3, h: 6 }}
+//         droppingItem={{i:"widget", w: 3, h: 6 }}
 //         cols={12}
 //         rowHeight={30}
 //         width={gridWidth}
