@@ -150,6 +150,7 @@
 //         width={gridWidth}
 //         margin={[7, 7]}
 //         containerPadding={[7, 7]}
+//         // resizeHandles={['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']}
 //         // allow reordering/dropping between widgets
 //         isDraggable={true}
 //         isResizable={true}
