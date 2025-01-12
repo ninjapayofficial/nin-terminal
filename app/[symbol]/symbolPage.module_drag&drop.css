@@ -59,6 +59,22 @@
     overflow-y: auto;
   }
   
+  /* Drawer header row with close button */
+  .widgetDrawerHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  
+  .closeButton {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  
   .widgetDraggable {
     display: flex;
     align-items: center;
