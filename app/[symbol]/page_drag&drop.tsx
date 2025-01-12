@@ -234,7 +234,13 @@
 
 //       {widgetDrawerOpen && (
 //         <div className={styles.widgetDrawer}>
-//           <h3>Widgets</h3>
+//           {/* 3) Drawer Header with Close Button */}
+//           <div className={styles.widgetDrawerHeader}>
+//             <h3>Widgets</h3>
+//             <button className={styles.closeButton} onClick={toggleWidgetDrawer}>
+//               ✕
+//             </button>
+//           </div>
 //           <p>Drag an item below onto the grid:</p>
 
 //           <div
