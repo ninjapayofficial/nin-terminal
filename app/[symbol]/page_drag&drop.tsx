@@ -1,4 +1,3 @@
-// // app/[symbol]/page.tsx
 // 'use client'
 
 // import React, { useEffect, useState } from 'react'
@@ -58,9 +57,8 @@
 //   const [widgetDrawerOpen, setWidgetDrawerOpen] = useState(false)
 
 //   /**
-//    * Instead of storing "draggingWidget" in the layout rendering, 
-//    * we store a "widgetMap" that associates each item key (i) with a widget type.
-//    * For example: widgetMap["new-item-1673"] = "orderBook"
+//    * We'll store a "widgetMap" that associates each item key (i) with a widget type.
+//    * Example: widgetMap["new-item-1673"] = "orderBook"
 //    */
 //   const [widgetMap, setWidgetMap] = useState<Record<string, string>>({})
 
@@ -87,7 +85,7 @@
 //     }
 //   }, [])
 
-//   /** ========== Listen for "open-widget-drawer" from Header ========== */
+//   /** ========== Listen for "open-widget-drawer" from Header (if any) ========== */
 //   useEffect(() => {
 //     const handleOpenDrawer = () => setWidgetDrawerOpen(true)
 //     window.addEventListener('open-widget-drawer', handleOpenDrawer)
@@ -108,14 +106,13 @@
 //     const newKey = `new-item-${Date.now()}`
 
 //     // RGL automatically appended droppedItem to currentLayout
-//     // We'll rename its key
+//     // We'll rename its key:
 //     const updatedLayout = currentLayout.map((item) =>
 //       item === droppedItem ? { ...item, i: newKey } : item
 //     )
 //     setLayout(updatedLayout)
 
-//     // Whichever widget was being dragged, store it in widgetMap
-//     // so this new item always has the correct type
+//     // Assign the dragged widget type:
 //     if (dragType) {
 //       setWidgetMap((prev) => ({
 //         ...prev,
@@ -129,7 +126,6 @@
 //   /** 
 //    * We'll store which widget type the user is dragging 
 //    * in a top-level state "dragType". 
-//    * This is only used for the moment of drop. 
 //    */
 //   const [dragType, setDragType] = useState<string | null>(null)
 //   const handleDragStart = (widget: string) => {
@@ -144,19 +140,16 @@
 //         layout={layout}
 //         onDrop={onDrop}
 //         isDroppable={true}
-//         droppingItem={{i:"widget", w: 3, h: 6 }}
+//         droppingItem={{ i: 'widget', w: 3, h: 6 }}
 //         cols={12}
 //         rowHeight={30}
 //         width={gridWidth}
 //         margin={[7, 7]}
 //         containerPadding={[7, 7]}
-//         // resizeHandles={['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']}
-//         // allow reordering/dropping between widgets
 //         isDraggable={true}
 //         isResizable={true}
-//         // limit dragging to .widgetHandle
-//         draggableHandle=".widgetHandle"
-//         // show placeholder so you can see where it's dropping
+//         /** ---- The Key: We use .myDragHandle as the handle ---- */
+//         draggableHandle=".myDragHandle"
 //         useCSSTransforms={true}
 //       >
 //         {layout.map((item) => {
@@ -166,12 +159,22 @@
 //           return (
 //             <div key={item.i} className={styles.dynamicItemContainer}>
 //               {/* 
-//                 4) Drag Handle in top-left corner:
-//                 User can click+drag the "☰" icon to reorder the widget
+//                 1) "Drag Handle" bar at the top
+//                 => same style as in your working snippet
 //               */}
-//               <div className={styles.widgetHandle}>☰</div>
+//               <div
+//                 className="myDragHandle"
+//                 style={{
+//                   // background: '#88a1ac08',
+//                   color: '#fff',
+//                   padding: '6px',
+//                   cursor: 'move'
+//                 }}
+//               >
+//                 {/* We keep your "☰" icon so UI stays the same! */}
+//                 ☰
+//               </div>
 
-//               {/* If dynamicWidget is defined => it's a new item */}
 //               {dynamicWidget ? (
 //                 <>
 //                   {dynamicWidget === 'chart' && (
@@ -235,7 +238,7 @@
 
 //       {widgetDrawerOpen && (
 //         <div className={styles.widgetDrawer}>
-//           {/* 3) Drawer Header with Close Button */}
+//           {/* Drawer Header with Close Button */}
 //           <div className={styles.widgetDrawerHeader}>
 //             <h3>Widgets</h3>
 //             <button className={styles.closeButton} onClick={toggleWidgetDrawer}>
@@ -250,7 +253,7 @@
 //             onDragStart={() => handleDragStart('chart')}
 //           >
 //             <Image
-//               src="/placeholder-chart.png"
+//               src="/chat-ai.svg"
 //               alt="Chart Widget"
 //               width={100}
 //               height={60}
