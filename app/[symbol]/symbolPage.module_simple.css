@@ -1,0 +1,160 @@
+/* .container {
+    display: grid;
+    grid-template-columns: 60% 40%;
+    gap: 0.5rem;
+    height: calc(100vh - 60px);
+
+    background: #0b0e11;
+    color: #e0e0e0;
+    overflow: hidden;
+  } */
+
+  .container {
+    height: calc(100vh - 60px);
+    background: #0b0e11;
+    color: #e0e0e0;
+    /* Keep any padding/margin if you want, but no 'display: grid' or 'overflow: hidden' */
+  }
+  
+  
+  .leftPane {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .chartArea {
+    flex: 1;
+    background: #151a1e;
+    margin-bottom: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* chart can fill this area */
+    border-radius: 7px;
+  }
+  
+  .tabsArea {
+    background: #1e2429;
+    height: 300px; /* or a dynamic size, up to you */
+    overflow-y: auto;
+    border-radius: 7px;
+  }
+  
+  .rightPane {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .topRight {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* orderbook + watchlist side by side */
+    gap: 0.5rem;
+    flex: 1;
+    background: #151a1e;
+  }
+  
+  .orderBook {
+    background: #20252a;
+    overflow-y: auto;
+    border-radius: 7px;
+  }
+  
+  .watchlist {
+    background: #20252a;
+    overflow-y: auto;
+    border-radius: 7px;
+  }
+  
+  .buySellArea {
+    background: #1e2429;
+    height: 300px; 
+    overflow-y: auto;
+    border-radius: 7px;
+  }
+
+  .pluginTabs {
+    background: #1e2429;
+    height: 300px; /* or a dynamic size, up to you */
+    overflow-y: auto;
+  }
+  
+
+  /* =========== FLOATING CHAT BUTTON =========== */
+  .chatButton {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    bottom: 20px;
+    right: 20px;
+    background: #88a1ac;
+    border: 2px solid #5f6f7687;
+    box-shadow: 0px 2px 8px #88a1ac56;
+    color: #fff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    font-size: 16px;
+    z-index: 9999; /* below the drawer, but above page content */
+  }
+
+  .chatButton:hover {
+    background-color: #00a1b3; /* Hover color */
+    transform: scale(1.1); /* Slightly enlarge on hover */
+  }
+  
+  .chatButton:active {
+    transform: scale(0.95); /* Slightly shrink on click */
+  }
+
+  .chatButton svg {
+    width: 28px; /* Size of the SVG */
+    height: 28px;
+    fill: none; /* Use stroke or styles defined in SVG */
+  }
+
+  /* =========== OVERLAY =========== */
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 10000; /* above the button, below the drawer */
+  }
+
+  /* =========== DRAWER =========== */
+  .drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 400px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -2px 0 8px rgba(0,0,0,0.3);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 10001; /* above overlay + button */
+  }
+
+  .drawerOpen {
+    transform: translateX(0);
+  }
+
+  .iframeContainer {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .myDragHandle {
+    background-color: #1e2429;
+    padding: 5px;
+    cursor: move;
+    color: #fff;
+    text-align: center;
+  }
+  

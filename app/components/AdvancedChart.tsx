@@ -25,13 +25,16 @@ interface AdvancedChartProps {
   symbol?: string
   mainRatio?: number
   rsiRatio?: number
+  // NEW: We accept an optional user script code
+  userScriptCode?: string | null;
 }
 
 export default function AdvancedChart({
   data,
   symbol,
   mainRatio = 70,
-  rsiRatio = 30
+  rsiRatio = 30,
+  userScriptCode // NEW
 }: AdvancedChartProps) {
   // Refs
   const containerRef = useRef<HTMLDivElement>(null)
@@ -46,9 +49,12 @@ export default function AdvancedChart({
   const rsiChartRef = useRef<IChartApi | null>(null)
   const rsiLineSeriesRef = useRef<ISeriesApi<'Line'> | null>(null)
 
+  // NEW: A ref to the user’s custom indicator line series
+  const userIndicatorSeriesRef = useRef<ISeriesApi<'Line'> | null>(null)
+
   // Popup states
   const [actionsVisible, setActionsVisible] = useState(false)
-  const [popupVisible, setPopupVisible] = useState(false) // We'll hide it on container mouseleave
+  const [popupVisible, setPopupVisible] = useState(false)
   const [popupX, setPopupX] = useState(0)
   const [popupY, setPopupY] = useState(0)
   const [lastPrice, setLastPrice] = useState<number | null>(null)
@@ -138,7 +144,7 @@ export default function AdvancedChart({
       })
     }
 
-    // Sync
+    // Sync time scales
     syncTimeScale(mainChartRef.current, rsiChartRef.current)
 
     // If we have data, set lastPrice
@@ -255,6 +261,63 @@ export default function AdvancedChart({
     addHorizontalLine(rsiChartRef.current, 70, '#ff0000', data)
     addHorizontalLine(rsiChartRef.current, 30, '#00ff00', data)
   }, [data])
+
+  // NEW: 3) Listen for changes to userScriptCode => parse & plot user indicator
+  useEffect(() => {
+    if (!mainChartRef.current) return
+
+    // If user cleared the script, remove the old line
+    if (!userScriptCode) {
+      if (userIndicatorSeriesRef.current) {
+        mainChartRef.current.removeSeries(userIndicatorSeriesRef.current)
+        userIndicatorSeriesRef.current = null
+      }
+      return
+    }
+
+    // Remove old user indicator line if it exists
+    if (userIndicatorSeriesRef.current) {
+      mainChartRef.current.removeSeries(userIndicatorSeriesRef.current)
+      userIndicatorSeriesRef.current = null
+    }
+
+    try {
+      // 1) Evaluate user code => get "main" function
+      //    We'll do a quick approach using new Function (in real code, do better sandboxing).
+      const wrappedScript = `
+        ${userScriptCode}
+        return (typeof main === 'function') ? main : null;
+      `
+      const userFunc = new Function(wrappedScript)()
+
+      if (typeof userFunc !== 'function') {
+        console.error('No function main(data) found in user script.')
+        return
+      }
+
+      // 2) Convert your data => UTCTimestamp
+      const candleData = data.map(d => ({
+        ...d,
+        time: d.time as unknown as UTCTimestamp
+      }))
+
+      // 3) Call user function => get array of { time, value }
+      const resultData = userFunc(candleData)
+      if (!Array.isArray(resultData) || resultData.length === 0) {
+        console.error('User script returned no data.')
+        return
+      }
+
+      // 4) Plot it on a new line series
+      userIndicatorSeriesRef.current = mainChartRef.current.addLineSeries({
+        color: 'yellow',
+        lineWidth: 2
+      })
+      userIndicatorSeriesRef.current.setData(resultData)
+    } catch (err) {
+      console.error('Error running user script:', err)
+    }
+  }, [userScriptCode, data])
 
   // 3) Resize
   function handleResize() {
@@ -413,7 +476,7 @@ export default function AdvancedChart({
 }
 
 /* ===============================
-   HELPER FUNCTIONS
+   HELPER FUNCTIONS (unchanged)
 =============================== */
 function calculateRSI(candles: Candle[], period: number) {
   if (candles.length < period) {

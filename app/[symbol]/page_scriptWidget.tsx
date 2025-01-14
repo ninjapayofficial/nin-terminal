@@ -124,6 +124,9 @@
 //     }
 //     // Clear the global "dragType"
 //     setDragType(null)
+
+//     // (ADDED) Done dropping external widget => hide dustbin
+//     setIsDragging(false)
 //   }
 
 //   /** 
@@ -131,12 +134,18 @@
 //    * in a top-level state "dragType". 
 //    */
 //   const [dragType, setDragType] = useState<string | null>(null)
+//   // (ADDED) In addition, we set isDragging to true so dustbin shows.
 //   const handleDragStart = (widget: string) => {
 //     setDragType(widget)
+//     setIsDragging(true) // (ADDED)
 //   }
 
 //   // NEW: We'll hold the user's custom code in state
 //   const [userScriptCode, setUserScriptCode] = useState<string | null>(null)
+
+//   /** ========== DRAG-TO-DELETE State ========== */
+//   const [isDragging, setIsDragging] = useState(false)
+//   const [draggedItemKey, setDraggedItemKey] = useState<string | null>(null)
 
 //   return (
 //     <div>
@@ -157,6 +166,33 @@
 //         /** ---- The Key: We use .myDragHandle as the handle ---- */
 //         draggableHandle=".myDragHandle"
 //         useCSSTransforms={true}
+//         /** ========== DRAG-TO-DELETE Callbacks ========== */
+//         onDragStart={(layout, oldItem) => {
+//           setIsDragging(true)
+//           setDraggedItemKey(oldItem.i)
+//         }}
+//         onDragStop={(layout, oldItem, newItem, placeholder, e) => {
+//           setIsDragging(false)
+
+//           // Check if dropped over dustbin:
+//           const dustbinEl = document.getElementById('dustbin')
+//           if (dustbinEl) {
+//             const dustbinRect = dustbinEl.getBoundingClientRect()
+//             const x = e.clientX
+//             const y = e.clientY
+
+//             if (
+//               x >= dustbinRect.left &&
+//               x <= dustbinRect.right &&
+//               y >= dustbinRect.top &&
+//               y <= dustbinRect.bottom
+//             ) {
+//               // Remove the dragged item from layout
+//               setLayout((prev) => prev.filter((li) => li.i !== oldItem.i))
+//             }
+//           }
+//           setDraggedItemKey(null)
+//         }}
 //       >
 //         {layout.map((item) => {
 //           // If there's an entry in widgetMap, it's a new/dynamic item
@@ -175,9 +211,9 @@
 //                   color: '#fff',
 //                   padding: '6px',
 //                   cursor: 'move',
-//                   position: 'absolute', // Add sticky positioning
+//                   position: 'absolute', 
 //                   top: 0,
-//                   zIndex: 999, // Ensure it appears above other content
+//                   zIndex: 999, 
 //                 }}
 //               >
 //                 {/* We keep your "☰" icon so UI stays the same! */}
@@ -217,6 +253,31 @@
 //           )
 //         })}
 //       </GridLayout>
+
+//       {/* ========== Dustbin (only visible while dragging) ========== */}
+//       {isDragging && (
+//         <div
+//           id="dustbin"
+//           style={{
+//             position: 'fixed',
+//             bottom: 40,
+//             left: '50%',
+//             transform: 'translateX(-50%)',
+//             width: 60,
+//             height: 60,
+//             borderRadius: '50%',
+//             backgroundColor: 'rgba(255,0,0,0.2)',
+//             display: 'flex',
+//             justifyContent: 'center',
+//             alignItems: 'center',
+//             zIndex: 99999,
+//             transition: 'all 0.3s ease-in-out',
+//           }}
+//         >
+//           {/* A dustbin icon or text */}
+//           <span style={{ fontSize: 24 }}>🗑</span>
+//         </div>
+//       )}
 
 //       {/* ========== Additional TABS Below ========== */}
 //       <div className={styles.terminalTabs}>
