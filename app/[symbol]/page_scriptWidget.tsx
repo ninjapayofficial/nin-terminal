@@ -171,10 +171,13 @@
 //               <div
 //                 className="myDragHandle"
 //                 style={{
-//                   // background: '#88a1ac08',
+//                   background: '#88a1ac08',
 //                   color: '#fff',
 //                   padding: '6px',
-//                   cursor: 'move'
+//                   cursor: 'move',
+//                   position: 'absolute', // Add sticky positioning
+//                   top: 0,
+//                   zIndex: 999, // Ensure it appears above other content
 //                 }}
 //               >
 //                 {/* We keep your "☰" icon so UI stays the same! */}

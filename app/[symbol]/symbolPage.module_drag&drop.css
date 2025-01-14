@@ -15,6 +15,7 @@
   background: #1e2429;
   border-radius: 6px;
   overflow-y: auto;
+  padding-top: 37px;
 }
 
 /* The small "☰" icon in top-left corner for dragging */
@@ -173,11 +174,14 @@
   color: #fff;
   text-align: center;
 } */
-
+/* 
 .myDragHandle {
   background: #88a1ac08;
   color: #fff;
   padding: 6px;
   cursor: move;
-}
+  position: inherit;
+  top:0;
+  z-index: 999;
+} */
 
