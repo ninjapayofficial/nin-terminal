@@ -9,7 +9,7 @@
     list-style: none;
     margin: 0;
     padding: 0;
-    background: #151a1e;
+    /* background: #151a1e; */
   }
   
   .tabItem {
@@ -29,7 +29,7 @@
   .tabContent {
     flex: 1;
     padding: 1rem;
-    background: #151a1e;
+    /* background: #151a1e; */
     overflow-y: auto;
   }
   

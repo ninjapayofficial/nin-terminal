@@ -1,21 +1,22 @@
 .container {
   height: calc(100vh - 60px);
-  background: #0b0e11;
+  /* background: #0b0e11; */
   color: #e0e0e0;
 }
 
 .terminalTabs {
-  background: #1e2429;
+  /* background: #1e2429; */
   height: 300px; /* or a dynamic size, up to you */
   overflow-y: auto;
 }
 
 .dynamicItemContainer {
   position: relative;
-  background: #1e2429;
+  /* background: #1e2429; */
   border-radius: 6px;
   overflow-y: auto;
   padding-top: 37px;
+  border: 1px solid #323847;
 }
 
 /* The small "☰" icon in top-left corner for dragging */
