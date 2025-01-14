@@ -308,9 +308,9 @@ export default function SymbolPage() {
       </div>
 
       {/* ========== "Add Widget" Button ========== */}
-      <button className={styles.addWidgetButton} onClick={toggleWidgetDrawer}>
+      {/* <button className={styles.addWidgetButton} onClick={toggleWidgetDrawer}>
         Add Widget
-      </button>
+      </button> */}
 
       {widgetDrawerOpen && (
         <div className={styles.widgetDrawer}>
