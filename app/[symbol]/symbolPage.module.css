@@ -67,13 +67,54 @@
   overflow-y: auto;
 }
 
-/* Drawer header row with close button */
+/* Widget drawer container */
+.widgetDrawer {
+  /* Position & sizing */
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;          /* Adjust as needed */
+  height: 100vh;         /* Full viewport height */
+  z-index: 9999;         /* Ensure it’s on top */
+  display: flex;
+  flex-direction: column;
+
+  /* Gradient background */
+  background-image: linear-gradient(270deg, #0d0e10 55%, rgba(0, 0, 0, 0) 100%);
+  background-position: right;
+  background-repeat: no-repeat;
+
+  /* Blurry, frosted effect */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);  /* Safari support */
+
+  /* Depth / shadow */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+
+  /* Optional: rounding corners, transitions, etc. */
+  border-radius: 0;     /* You could do something like 16px if it’s floating */
+  transition: transform 0.3s cubic-bezier(.4, 0, .2, 1);
+  overflow: hidden;      /* Ensures child elements don’t overflow the drawer */
+}
+
+/* Example header row within the widget drawer */
 .widgetDrawerHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* Optional: open/close states for slide-in/out animations */
+.widgetDrawer--open {
+  transform: translateX(0);  /* fully in view */
+}
+
+.widgetDrawer--closed {
+  transform: translateX(100%); /* slide off-screen to the right */
+}
+
 
 .closeButton {
   background: none;
@@ -89,7 +130,7 @@
   margin-bottom: 16px;
   background: #3d4348;
   padding: 8px;
-  border-radius: 4px;
+  border-radius: 14px;
   cursor: grab;
 }
 
