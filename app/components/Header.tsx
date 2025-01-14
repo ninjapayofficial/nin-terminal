@@ -34,7 +34,7 @@ export async function UserOrLogin() {
 // Header component
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between w-full h-16 px-4 border-b border-gray-700 bg-gradient-to-b from-black-900 via-black-800 to-gray-700 text-white backdrop-blur-xl">
+    <header className="sticky top-0 z-50 flex items-center justify-between w-full h-16 px-4 border-b border-gray-600 bg-gradient-to-b from-black-900 via-black-800 to-gray-700 text-white backdrop-blur-xl">
       <div className="flex items-center">
         <React.Suspense fallback={<div>Loading...</div>}>
           <UserOrLogin />
