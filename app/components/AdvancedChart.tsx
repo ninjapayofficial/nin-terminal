@@ -26,7 +26,7 @@ interface AdvancedChartProps {
   mainRatio?: number
   rsiRatio?: number
   // NEW: We accept an optional user script code
-  userScriptCode?: string | null;
+  userScriptCode?: string | null
 }
 
 export default function AdvancedChart({
@@ -404,7 +404,8 @@ export default function AdvancedChart({
       }}
     >
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div ref={mainChartContainer} style={{ flex: 1 }} /> {/* Make it flexible */}
+        <div ref={mainChartContainer} style={{ flex: 1 }} />{' '}
+        {/* Make it flexible */}
         <div ref={rsiChartContainer} style={{ flexShrink: 0, marginTop: 8 }} />
       </div>
 

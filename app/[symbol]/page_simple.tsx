@@ -13,7 +13,6 @@
 // import GridLayout from 'react-grid-layout'
 // import Image from 'next/image'
 
-
 // export default function SymbolPage() {
 //   const routeParams = useParams() as { symbol?: string }
 //   const symbol = routeParams.symbol ?? 'paytm.ns'
@@ -42,19 +41,19 @@
 //   const layout = [
 //     // Left side (Chart)
 //     { i: 'chartArea',   x: 0, y: 0,  w: 8, h: 16 },
-  
+
 //     // Left side (Tabs below chart)
 //     { i: 'tabsAreaTop', x: 0, y: 10, w: 8, h: 4 },
-  
+
 //     // Right side (OrderBook - top)
 //     { i: 'orderBook',   x: 8, y: 0,  w: 2, h: 12 },
-  
+
 //     // Right side (Watchlist - middle)
 //     { i: 'watchlist',   x: 10, y: 0,  w: 2, h: 12 },
-  
+
 //     // Right side (Buy/Sell - bottom)
 //     { i: 'buySell',     x: 8, y: 6, w: 4, h: 8 },
-  
+
 //     // Entire bottom area (Tabs)
 //     { i: 'tabsAreaBottom', x: 0, y: 14, w: 12, h: 4 },
 //   ]
@@ -70,7 +69,6 @@
 //       });
 //     }
 //   }, []);
-  
 
 //   return (
 //     <div>
@@ -118,7 +116,6 @@
 //           <TerminalTabs />
 //         </div> */}
 //       </GridLayout>
-
 
 //       {/* Additional TABS below, if needed */}
 //       <div className={styles.pluginTabs}>

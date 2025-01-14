@@ -12,7 +12,7 @@ import Watchlist from '../components/Watchlist'
 import BuySell from '../components/BuySell'
 import AdvancedChart from '../components/AdvancedChart'
 import Image from 'next/image'
-import ScriptEditor from '../components/ScriptEditor'  // Import the new component
+import ScriptEditor from '../components/ScriptEditor' // Import the new component
 
 import styles from './symbolPage.module.css'
 
@@ -37,14 +37,13 @@ type RGLLayout = RGLLayoutItem[]
 
 /** ========== 2) Default Layout ========== */
 const defaultLayout: RGLLayout = [
-  { i: 'chartArea',      x: 0,  y: 0,  w: 8,  h: 16 },
-  { i: 'tabsAreaTop',    x: 0,  y: 10, w: 8,  h: 4 },
-  { i: 'orderBook',      x: 8,  y: 0,  w: 2,  h: 12 },
-  { i: 'watchlist',      x: 10, y: 0,  w: 2,  h: 12 },
-  { i: 'buySell',        x: 8,  y: 6,  w: 4,  h: 8 },
-  { i: 'tabsAreaBottom', x: 0,  y: 14, w: 12, h: 4 },
+  { i: 'chartArea', x: 0, y: 0, w: 8, h: 16 },
+  { i: 'tabsAreaTop', x: 0, y: 10, w: 8, h: 4 },
+  { i: 'orderBook', x: 8, y: 0, w: 2, h: 12 },
+  { i: 'watchlist', x: 10, y: 0, w: 2, h: 12 },
+  { i: 'buySell', x: 8, y: 6, w: 4, h: 8 },
+  { i: 'tabsAreaBottom', x: 0, y: 14, w: 12, h: 4 }
 ]
-
 
 export default function SymbolPage() {
   /** ========== Symbol Param ========== */
@@ -110,14 +109,14 @@ export default function SymbolPage() {
 
     // RGL automatically appended droppedItem to currentLayout
     // We'll rename its key:
-    const updatedLayout = currentLayout.map((item) =>
+    const updatedLayout = currentLayout.map(item =>
       item === droppedItem ? { ...item, i: newKey } : item
     )
     setLayout(updatedLayout)
 
     // Assign the dragged widget type:
     if (dragType) {
-      setWidgetMap((prev) => ({
+      setWidgetMap(prev => ({
         ...prev,
         [newKey]: dragType
       }))
@@ -129,9 +128,9 @@ export default function SymbolPage() {
     setIsDragging(false)
   }
 
-  /** 
-   * We'll store which widget type the user is dragging 
-   * in a top-level state "dragType". 
+  /**
+   * We'll store which widget type the user is dragging
+   * in a top-level state "dragType".
    */
   const [dragType, setDragType] = useState<string | null>(null)
   // (ADDED) In addition, we set isDragging to true so dustbin shows.
@@ -188,13 +187,13 @@ export default function SymbolPage() {
               y <= dustbinRect.bottom
             ) {
               // Remove the dragged item from layout
-              setLayout((prev) => prev.filter((li) => li.i !== oldItem.i))
+              setLayout(prev => prev.filter(li => li.i !== oldItem.i))
             }
           }
           setDraggedItemKey(null)
         }}
       >
-        {layout.map((item) => {
+        {layout.map(item => {
           // If there's an entry in widgetMap, it's a new/dynamic item
           const dynamicWidget = widgetMap[item.i]
 
@@ -211,19 +210,22 @@ export default function SymbolPage() {
                   color: '#fff',
                   padding: '6px',
                   cursor: 'move',
-                  position: 'absolute', 
+                  position: 'absolute',
                   top: 0,
-                  zIndex: 999, 
+                  zIndex: 999
                 }}
               >
-                {/* We keep your "☰" icon so UI stays the same! */}
-                ☰
+                {/* We keep your "☰" icon so UI stays the same! */}☰
               </div>
 
               {dynamicWidget ? (
                 <>
                   {dynamicWidget === 'chart' && (
-                    <AdvancedChart data={chartData} symbol={symbol} userScriptCode={userScriptCode} />
+                    <AdvancedChart
+                      data={chartData}
+                      symbol={symbol}
+                      userScriptCode={userScriptCode}
+                    />
                   )}
                   {dynamicWidget === 'orderBook' && <OrderBook />}
                   {dynamicWidget === 'watchlist' && <Watchlist />}
@@ -231,8 +233,8 @@ export default function SymbolPage() {
                   {dynamicWidget === 'tabs' && <TerminalTabs />}
                   {dynamicWidget === 'scriptEditor' && (
                     // The script editor. On "Apply," we store code in userScriptCode.
-                    <ScriptEditor 
-                      onApply={(scriptCode) => setUserScriptCode(scriptCode)} 
+                    <ScriptEditor
+                      onApply={scriptCode => setUserScriptCode(scriptCode)}
                     />
                   )}
                 </>
@@ -240,7 +242,11 @@ export default function SymbolPage() {
                 /** Otherwise, it's one of your default items by key */
                 <>
                   {item.i === 'chartArea' && (
-                    <AdvancedChart data={chartData} symbol="PAYTM.NS" userScriptCode={userScriptCode} />
+                    <AdvancedChart
+                      data={chartData}
+                      symbol="PAYTM.NS"
+                      userScriptCode={userScriptCode}
+                    />
                   )}
                   {item.i === 'tabsAreaTop' && <PluginTabs />}
                   {item.i === 'orderBook' && <OrderBook />}
@@ -271,7 +277,7 @@ export default function SymbolPage() {
             justifyContent: 'center',
             alignItems: 'center',
             zIndex: 99999,
-            transition: 'all 0.3s ease-in-out',
+            transition: 'all 0.3s ease-in-out'
           }}
         >
           {/* A dustbin icon or text */}

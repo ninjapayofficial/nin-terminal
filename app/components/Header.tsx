@@ -31,7 +31,6 @@ export async function UserOrLogin() {
   )
 }
 
-
 // Header component
 export function Header() {
   return (
