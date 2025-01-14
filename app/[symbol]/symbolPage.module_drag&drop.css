@@ -4,6 +4,12 @@
   color: #e0e0e0;
 }
 
+.terminalTabs {
+  background: #1e2429;
+  height: 300px; /* or a dynamic size, up to you */
+  overflow-y: auto;
+}
+
 .dynamicItemContainer {
   position: relative;
   background: #1e2429;

@@ -216,7 +216,7 @@
 //       </GridLayout>
 
 //       {/* ========== Additional TABS Below ========== */}
-//       <div className={styles.pluginTabs}>
+//       <div className={styles.terminalTabs}>
 //         <TerminalTabs />
 //       </div>
 
