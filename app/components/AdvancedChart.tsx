@@ -70,7 +70,8 @@ export default function AdvancedChart({
       mainChartRef.current = createChart(mainChartContainer.current, {
         layout: {
           background: { color: '#0b0e11' },
-          textColor: '#e0e0e0'
+          textColor: '#e0e0e0',
+          attributionLogo: false
         },
         timeScale: { borderColor: '#2f3336', barSpacing: 8 },
         rightPriceScale: { borderColor: '#2f3336' },
@@ -115,7 +116,7 @@ export default function AdvancedChart({
     // RSI chart
     if (!rsiChartRef.current) {
       rsiChartRef.current = createChart(rsiChartContainer.current, {
-        layout: { background: { color: '#0b0e11' }, textColor: '#e0e0e0' },
+        layout: { background: { color: '#0b0e11' }, textColor: '#e0e0e0', attributionLogo: false },
         timeScale: { borderColor: '#2f3336' },
         rightPriceScale: { borderColor: '#2f3336' },
         grid: {
@@ -136,7 +137,7 @@ export default function AdvancedChart({
             color: '#9194a3',
             labelVisible: false
           }
-        }
+        },
       })
       rsiLineSeriesRef.current = rsiChartRef.current.addLineSeries({
         color: '#ff9900',
