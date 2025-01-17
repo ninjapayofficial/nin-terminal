@@ -231,7 +231,7 @@ export default function SymbolPage() {
                   {dynamicWidget === 'orderBook' && <OrderBook />}
                   {dynamicWidget === 'watchlist' && <Watchlist />}
                   {dynamicWidget === 'buySell' && <BuySell symbol={symbol} />}
-                  {dynamicWidget === 'tabs' && <TerminalTabs />}
+                  {dynamicWidget === 'tabs' && <PluginTabs />}
                   {dynamicWidget === 'scriptEditor' && (
                     // The script editor. On "Apply," we store code in userScriptCode.
                     <ScriptEditor
