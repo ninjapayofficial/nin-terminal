@@ -36,43 +36,18 @@ export default function AdvancedChart({
   rsiRatio = 30,
   userScriptCode // NEW
 }: AdvancedChartProps) {
-  // ==========================
-  // NEW CODE: local states
-  // ==========================
-  // We'll store the user-selected symbol & data for *this* chart only
-  const [currentSymbol, setCurrentSymbol] = useState(symbol ?? 'PAYTM.NS') // The chart’s active symbol
-  const [chartDataLocal, setChartDataLocal] = useState<Candle[]>(data)      // Local data for chart
+  // 1) State for the chart’s symbol/data
+  //    If no symbol passed in, fallback to 'PAYTM.NS'
+  const [currentSymbol, setCurrentSymbol] = useState(() => {
+    return symbol && symbol.trim() !== '' ? symbol : 'PAYTM.NS'
+  })
+  const [chartDataLocal, setChartDataLocal] = useState<Candle[]>(data)
 
-  // NEW CODE: small modal to pick a new symbol
+  // Symbol Picker
   const [symbolPickerOpen, setSymbolPickerOpen] = useState(false)
   const [newSymbol, setNewSymbol] = useState(currentSymbol)
 
-  // NEW CODE: function to fetch data from /api/chart?symbol=...
-  async function fetchAndSetSymbol(sym: string) {
-    try {
-      const response = await fetch(`/api/chart?symbol=${sym}`)
-      if (!response.ok) {
-        throw new Error(`Failed to fetch symbol data for ${sym}`)
-      }
-      const newData: Candle[] = await response.json()
-      setChartDataLocal(newData)
-    } catch (error) {
-      console.error('Error fetching data for symbol:', error)
-    }
-  }
-
-  // NEW CODE: if currentSymbol changes from the parent's initial, do a local fetch
-  // Otherwise if user sets it back, revert to parent's data.
-  useEffect(() => {
-    if (currentSymbol !== symbol) {
-      fetchAndSetSymbol(currentSymbol)
-    } else {
-      setChartDataLocal(data)
-    }
-  }, [currentSymbol, symbol, data])
-  // End NEW CODE
-
-  // Refs
+  // Main chart references
   const containerRef = useRef<HTMLDivElement>(null)
   const mainChartContainer = useRef<HTMLDivElement>(null)
   const rsiChartContainer = useRef<HTMLDivElement>(null)
@@ -97,7 +72,51 @@ export default function AdvancedChart({
   const [price, setPrice] = useState<number | null>(null)
   const [percentChange, setPercentChange] = useState<string>('')
 
-  // 1) Create charts on mount
+  // ========== OPEN ORDERS ==========
+  const [openOrders, setOpenOrders] = useState<any[]>([])
+  // We'll store references to each created PriceLine so we can remove them if data changes
+  const [openOrderLines, setOpenOrderLines] = useState<any[]>([])
+
+  // 2) Fetch data for new symbol
+  async function fetchAndSetSymbol(sym: string) {
+    try {
+      const response = await fetch(`/api/chart?symbol=${sym}`)
+      if (!response.ok) {
+        throw new Error(`Failed to fetch symbol data for ${sym}`)
+      }
+      const newData: Candle[] = await response.json()
+      setChartDataLocal(newData)
+    } catch (error) {
+      console.error('Error fetching data for symbol:', error)
+    }
+  }
+
+  // Fetch open orders from /api/openorders
+  async function fetchOpenOrders() {
+    try {
+      const res = await fetch('/api/openorders')
+      if (!res.ok) {
+        throw new Error('Failed to fetch open orders!')
+      }
+      const orders = await res.json()
+      setOpenOrders(orders)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  // 3) If currentSymbol changes, refetch both chart data and openorders
+  useEffect(() => {
+    fetchOpenOrders()
+
+    if (currentSymbol !== symbol) {
+      fetchAndSetSymbol(currentSymbol)
+    } else {
+      setChartDataLocal(data)
+    }
+  }, [currentSymbol, symbol, data])
+
+  // 4) Create Charts on first mount (or if chartDataLocal changes in a way that re-renders)
   useEffect(() => {
     if (!mainChartContainer.current || !rsiChartContainer.current) return
 
@@ -152,7 +171,11 @@ export default function AdvancedChart({
     // RSI chart
     if (!rsiChartRef.current) {
       rsiChartRef.current = createChart(rsiChartContainer.current, {
-        layout: { background: { color: '#0b0e11' }, textColor: '#e0e0e0', attributionLogo: false },
+        layout: {
+          background: { color: '#0b0e11' },
+          textColor: '#e0e0e0',
+          attributionLogo: false
+        },
         timeScale: { borderColor: '#2f3336' },
         rightPriceScale: { borderColor: '#2f3336' },
         grid: {
@@ -173,12 +196,17 @@ export default function AdvancedChart({
             color: '#9194a3',
             labelVisible: false
           }
-        },
+        }
       })
+
       rsiLineSeriesRef.current = rsiChartRef.current.addLineSeries({
         color: '#ff9900',
         lineWidth: 2
       })
+
+      // ========== Fix repeated RSI lines by just adding them ONCE here ==========
+      addRSILineOnce(rsiChartRef.current, 70, '#ff0000', 'rsi70')
+      addRSILineOnce(rsiChartRef.current, 30, '#00ff00', 'rsi30')
     }
 
     // Sync time scales
@@ -192,28 +220,21 @@ export default function AdvancedChart({
 
     // Initial resize
     handleResize()
-    // Remove window resize listener since we'll use ResizeObserver instead
-    // window.addEventListener('resize', handleResize)
 
-    // CROSSHAIR: we do NOT hide on param.point=null
-    // we only hide the popup on container's mouseleave
+    // CROSSHAIR
     if (mainChartRef.current && mainSeriesRef.current) {
       mainChartRef.current.subscribeCrosshairMove(param => {
-        // If param.point is null => user is outside the main candle area or scale
-        // => in old code we might hide, but we won't do that here
         if (!param.point) {
-          // do nothing (i.e. keep the popup in place)
+          // do nothing
           return
         }
-
-        // Ensure popup is visible if inside container
         setPopupVisible(true)
 
         // Y => price
         const currentPrice = mainSeriesRef.current!.coordinateToPrice(
           param.point.y
         )
-        if (currentPrice == null) return // no update
+        if (currentPrice == null) return
         setPrice(currentPrice)
 
         // % from last
@@ -229,24 +250,21 @@ export default function AdvancedChart({
         const chartW = mainChartContainer.current!.clientWidth
         const popupW = 200
         const x = chartW - popupW - 10
-        const popupHeight = popupRef.current
-          ? popupRef.current.offsetHeight
-          : 60 // Fallback to default
+        const popupHeight = popupRef.current ? popupRef.current.offsetHeight : 60
         const y = param.point.y - popupHeight / 2
         setPopupX(x)
         setPopupY(y)
       })
     }
 
-    // MOUSE EVENTS ON CONTAINER:
-    // - Hide on mouseleave
+    // MOUSE EVENTS
     const containerEl = containerRef.current
     if (containerEl) {
       containerEl.addEventListener('mouseleave', onMouseLeave)
       containerEl.addEventListener('mouseenter', onMouseEnter)
     }
 
-    // 6. **Add ResizeObserver**
+    // ResizeObserver
     const resizeObserver = new ResizeObserver(() => {
       handleResize()
     })
@@ -255,25 +273,18 @@ export default function AdvancedChart({
     }
 
     return () => {
-      // window.removeEventListener('resize', handleResize)
       if (containerEl) {
         containerEl.removeEventListener('mouseleave', onMouseLeave)
         containerEl.removeEventListener('mouseenter', onMouseEnter)
         resizeObserver.unobserve(containerEl)
       }
     }
-    // NOTE: dependency changed from "data" to "chartDataLocal"
   }, [chartDataLocal, lastPrice])
 
-  // 2) Data updates => set chart data
+  // 5) Data => set chart data, then plot open orders
   useEffect(() => {
     if (!chartDataLocal.length) return
-    if (
-      !mainSeriesRef.current ||
-      !volumeSeriesRef.current ||
-      !rsiLineSeriesRef.current
-    )
-      return
+    if (!mainSeriesRef.current || !volumeSeriesRef.current || !rsiLineSeriesRef.current) return
 
     // Candles
     const candleData = chartDataLocal.map(d => ({
@@ -296,11 +307,12 @@ export default function AdvancedChart({
     // RSI
     const rsiPts = calculateRSI(chartDataLocal, 14)
     rsiLineSeriesRef.current.setData(rsiPts)
-    addHorizontalLine(rsiChartRef.current, 70, '#ff0000', chartDataLocal)
-    addHorizontalLine(rsiChartRef.current, 30, '#00ff00', chartDataLocal)
-  }, [chartDataLocal])
 
-  // NEW: 3) Listen for changes to userScriptCode => parse & plot user indicator
+    // Plot open orders
+    plotOpenOrders()
+  }, [chartDataLocal, openOrders])
+
+  // 6) Listen for changes to userScriptCode => parse & plot user indicator
   useEffect(() => {
     if (!mainChartRef.current) return
 
@@ -313,15 +325,13 @@ export default function AdvancedChart({
       return
     }
 
-    // Remove old user indicator line if it exists
+    // Remove old line if it exists
     if (userIndicatorSeriesRef.current) {
       mainChartRef.current.removeSeries(userIndicatorSeriesRef.current)
       userIndicatorSeriesRef.current = null
     }
 
     try {
-      // 1) Evaluate user code => get "main" function
-      //    We'll do a quick approach using new Function (in real code, do better sandboxing).
       const wrappedScript = `
         ${userScriptCode}
         return (typeof main === 'function') ? main : null;
@@ -333,20 +343,17 @@ export default function AdvancedChart({
         return
       }
 
-      // 2) Convert your data => UTCTimestamp
       const candleData = chartDataLocal.map(d => ({
         ...d,
         time: d.time as unknown as UTCTimestamp
       }))
 
-      // 3) Call user function => get array of { time, value }
       const resultData = userFunc(candleData)
       if (!Array.isArray(resultData) || resultData.length === 0) {
         console.error('User script returned no data.')
         return
       }
 
-      // 4) Plot it on a new line series
       userIndicatorSeriesRef.current = mainChartRef.current.addLineSeries({
         color: 'yellow',
         lineWidth: 2
@@ -357,10 +364,90 @@ export default function AdvancedChart({
     }
   }, [userScriptCode, chartDataLocal])
 
-  // 3) Resize
+  // 7) plotOpenOrders => single PriceLine per order type
+  function plotOpenOrders() {
+    // Clear old lines
+    openOrderLines.forEach(lineObj => {
+      mainSeriesRef.current?.removePriceLine(lineObj)
+    })
+    setOpenOrderLines([])
+
+    if (!mainSeriesRef.current || !chartDataLocal.length || !openOrders.length) return
+
+    // Filter for current symbol
+    const matchedOrders = openOrders.filter(o => 
+      o.symbol.toLowerCase() === currentSymbol.toLowerCase()
+    )
+
+    const newLines: any[] = []
+
+    matchedOrders.forEach(order => {
+      // 1) Limit Price line => [BUY] or [SELL]
+      const sideColor = order.side === 'BUY' ? '#2DBD85' : '#F6465D'
+      const sideLabel = `[${order.side}]` // e.g. [BUY]
+
+      const limitLine = mainSeriesRef.current?.createPriceLine({
+        price: order.limitPrice,
+        color: sideColor,
+        lineWidth: 2,
+        lineStyle: LineStyle.Solid,
+        // We'll show the price automatically on right scale
+        axisLabelVisible: true,
+        title: sideLabel
+      })
+      newLines.push(limitLine)
+
+      // 2) StopLoss line => [SL: -₹xxx (xx%)]
+      if (order.stopLoss) {
+        const isBuy = order.side === 'BUY'
+        // For "BUY", actual PnL if stopped out: (stopLoss - limitPrice)*size => negative
+        // For "SELL", if stopLoss is above limitPrice => it's a negative outcome, etc.
+        const diff = isBuy
+          ? (order.stopLoss - order.limitPrice) * order.size
+          : (order.limitPrice - order.stopLoss) * order.size
+        const pct = (diff / (order.limitPrice * order.size)) * 100
+        const slColor = '#ff3333'
+
+        const slLine = mainSeriesRef.current?.createPriceLine({
+          price: order.stopLoss,
+          color: slColor,
+          lineWidth: 1,
+          lineStyle: LineStyle.Dotted,
+          axisLabelVisible: true,
+          title: `[SL: ${diff >= 0 ? '+' : ''}₹${diff.toFixed(2)} (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)]`
+        })
+        newLines.push(slLine)
+      }
+
+      // 3) TakeProfit line => [TP: +₹xxx (xx%)]
+      if (order.takeProfit) {
+        const isBuy = order.side === 'BUY'
+        // For "BUY": (takeProfit - limitPrice)*size => typically positive
+        // For "SELL": (limitPrice - takeProfit)*size => typically positive if below limitPrice
+        const diff = isBuy
+          ? (order.takeProfit - order.limitPrice) * order.size
+          : (order.limitPrice - order.takeProfit) * order.size
+        const pct = (diff / (order.limitPrice * order.size)) * 100
+        const tpColor = '#33ff33'
+
+        const tpLine = mainSeriesRef.current?.createPriceLine({
+          price: order.takeProfit,
+          color: tpColor,
+          lineWidth: 1,
+          lineStyle: LineStyle.Dotted,
+          axisLabelVisible: true,
+          title: `[TP: ${diff >= 0 ? '+' : ''}₹${diff.toFixed(2)} (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)]`
+        })
+        newLines.push(tpLine)
+      }
+    })
+
+    setOpenOrderLines(newLines)
+  }
+
+  // 8) handleResize
   function handleResize() {
-    if (!containerRef.current || !mainChartRef.current || !rsiChartRef.current)
-      return
+    if (!containerRef.current || !mainChartRef.current || !rsiChartRef.current) return
     const totalH = containerRef.current.clientHeight
     const totalW = containerRef.current.clientWidth
     const sum = mainRatio + rsiRatio
@@ -372,33 +459,29 @@ export default function AdvancedChart({
     rsiChartRef.current.timeScale().fitContent()
   }
 
-  // 4) Container-level mouse events
+  // Container-level mouse events
   function onMouseLeave() {
-    setPopupVisible(false) // Only hide if truly leaving container
+    setPopupVisible(false)
   }
   function onMouseEnter() {
-    // If we want to show the popup again as soon as they re-enter, we can do so
-    // but typically we'll let crosshair move event handle it
-    // setPopupVisible(true);
+    // do nothing
   }
 
-  // 5) The “+ button => buy/sell/draw” toggles
+  // The “+ button => buy/sell/draw” toggles
   function toggleActions() {
     setActionsVisible(!actionsVisible)
   }
-
   function handleBuy() {
     if (price == null) return
     alert(`Buy at $${price.toFixed(2)}`)
   }
-
   function handleSell() {
     if (price == null) return
     alert(`Sell at $${price.toFixed(2)}`)
   }
-
   function handleDraw() {
     if (!chartDataLocal.length || price == null || !mainChartRef.current) return
+    // Example of a quick horizontal line using a new lineSeries
     const lineSeries = mainChartRef.current.addLineSeries({
       color: '#ffffff',
       lineWidth: 1
@@ -417,7 +500,6 @@ export default function AdvancedChart({
     position: 'absolute',
     left: popupX + 100,
     top: popupY,
-    // width: 150,
     background: '#c6dfeaf6',
     border: '1px solid #00000017',
     borderRadius: 5,
@@ -441,14 +523,7 @@ export default function AdvancedChart({
         flexDirection: 'column'
       }}
     >
-      {/* ============================
-          NEW CODE: Symbol Button
-          ============================
-          Absolutely positioned in top-left
-          so it appears near the "☰" handle 
-          from your parent. Adjust left/top 
-          if needed.
-      */}
+      {/* Symbol Picker Button */}
       <div
         style={{
           position: 'absolute',
@@ -474,15 +549,13 @@ export default function AdvancedChart({
           {currentSymbol} ▼
         </button>
       </div>
-      {/* End NEW CODE */}
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div ref={mainChartContainer} style={{ flex: 1 }} />{' '}
-        {/* Make it flexible */}
+        <div ref={mainChartContainer} style={{ flex: 1 }} />
         <div ref={rsiChartContainer} style={{ flexShrink: 0, marginTop: 8 }} />
       </div>
 
-      {/* Popup (like Node plugin) */}
+      {/* Popup */}
       <div ref={popupRef} style={popupStyle}>
         <button
           onClick={toggleActions}
@@ -505,9 +578,7 @@ export default function AdvancedChart({
         </button>
 
         {actionsVisible && (
-          <div
-            style={{ display: 'flex', flexDirection: 'column', marginRight: 6 }}
-          >
+          <div style={{ display: 'flex', flexDirection: 'column', marginRight: 6 }}>
             <button
               style={{ marginBottom: 5, background: '#16a085', color: '#fff' }}
               onClick={handleBuy}
@@ -546,9 +617,7 @@ export default function AdvancedChart({
         </p>
       </div>
 
-      {/* =========================
-          NEW CODE: Symbol Picker
-          ========================= */}
+      {/* Symbol Picker Modal */}
       {symbolPickerOpen && (
         <div
           style={{
@@ -578,13 +647,13 @@ export default function AdvancedChart({
               type="text"
               value={newSymbol}
               onChange={e => setNewSymbol(e.target.value.trim())}
-              placeholder="e.g. SBIN.NS"
+              placeholder="e.g. YESBANK.NS"
               style={{ marginRight: 6 }}
             />
             <button
               onClick={() => {
-                setCurrentSymbol(newSymbol) // Triggers data fetch
-                setSymbolPickerOpen(false)  // Close popup
+                setCurrentSymbol(newSymbol)
+                setSymbolPickerOpen(false)
               }}
             >
               OK
@@ -598,7 +667,6 @@ export default function AdvancedChart({
           </div>
         </div>
       )}
-      {/* End NEW CODE */}
     </div>
   )
 }
@@ -664,22 +732,25 @@ function calculateRSI(candles: Candle[], period: number) {
   return result
 }
 
-function addHorizontalLine(
-  chart: IChartApi | null,
-  value: number,
-  color: string,
-  data: Candle[]
-) {
-  if (!chart || !data.length) return
+/**
+ * Creates dotted lines for RSI only once
+ */
+function addRSILineOnce(chart: IChartApi | null, value: number, color: string, id: string) {
+  if (!chart) return
+  // If you want to avoid re-creating lines, you can store them in a ref or global.
   const lineSeries = chart.addLineSeries({
     color,
     lineWidth: 1,
     lineStyle: LineStyle.Dotted
   })
-  lineSeries.setData([
-    { time: data[0].time as unknown as UTCTimestamp, value },
-    { time: data[data.length - 1].time as unknown as UTCTimestamp, value }
-  ])
+  // We'll create the line from "some old time" to "some future time"
+  // but simpler is to let RSI line have a big range: we can do setData to a dummy array
+  const dummy: { time: UTCTimestamp; value: number }[] = []
+  // We'll just do 2 points in some far range. This is enough to draw a horizontal line
+  // from 0..9999999999 or something
+  dummy.push({ time: 1672549200 as UTCTimestamp, value }) // arbitrary
+  dummy.push({ time: 1972549200 as UTCTimestamp, value })
+  lineSeries.setData(dummy)
 }
 
 function syncTimeScale(chartA: IChartApi | null, chartB: IChartApi | null) {
