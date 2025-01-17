@@ -15,17 +15,18 @@
   
   .tab {
     padding: 0.3rem 0.6rem;
-    background: #1e2429;
+    background: #88a1ac16;
     cursor: pointer;
     color: #e0e0e0;
+    border-radius: 7;
   }
   
   .tab:hover {
-    background: #2a2f34;
+    background: #086b7a50; 
   }
   
   .activeTab {
-    background: #2f3336;
+    background: #88a1ac41;
   }
   
   .tabContent {

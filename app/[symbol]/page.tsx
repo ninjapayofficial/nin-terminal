@@ -212,6 +212,7 @@ export default function SymbolPage() {
                   cursor: 'move',
                   position: 'absolute',
                   top: 0,
+                  right: 0,
                   zIndex: 999
                 }}
               >

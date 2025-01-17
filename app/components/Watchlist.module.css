@@ -16,6 +16,7 @@
     background: #1e2429;
     cursor: pointer;
     color: #e0e0e0;
+    border-radius: 7;
   }
   
   .tab:hover {

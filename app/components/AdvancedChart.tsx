@@ -36,6 +36,42 @@ export default function AdvancedChart({
   rsiRatio = 30,
   userScriptCode // NEW
 }: AdvancedChartProps) {
+  // ==========================
+  // NEW CODE: local states
+  // ==========================
+  // We'll store the user-selected symbol & data for *this* chart only
+  const [currentSymbol, setCurrentSymbol] = useState(symbol ?? 'PAYTM.NS') // The chart’s active symbol
+  const [chartDataLocal, setChartDataLocal] = useState<Candle[]>(data)      // Local data for chart
+
+  // NEW CODE: small modal to pick a new symbol
+  const [symbolPickerOpen, setSymbolPickerOpen] = useState(false)
+  const [newSymbol, setNewSymbol] = useState(currentSymbol)
+
+  // NEW CODE: function to fetch data from /api/chart?symbol=...
+  async function fetchAndSetSymbol(sym: string) {
+    try {
+      const response = await fetch(`/api/chart?symbol=${sym}`)
+      if (!response.ok) {
+        throw new Error(`Failed to fetch symbol data for ${sym}`)
+      }
+      const newData: Candle[] = await response.json()
+      setChartDataLocal(newData)
+    } catch (error) {
+      console.error('Error fetching data for symbol:', error)
+    }
+  }
+
+  // NEW CODE: if currentSymbol changes from the parent's initial, do a local fetch
+  // Otherwise if user sets it back, revert to parent's data.
+  useEffect(() => {
+    if (currentSymbol !== symbol) {
+      fetchAndSetSymbol(currentSymbol)
+    } else {
+      setChartDataLocal(data)
+    }
+  }, [currentSymbol, symbol, data])
+  // End NEW CODE
+
   // Refs
   const containerRef = useRef<HTMLDivElement>(null)
   const mainChartContainer = useRef<HTMLDivElement>(null)
@@ -149,8 +185,8 @@ export default function AdvancedChart({
     syncTimeScale(mainChartRef.current, rsiChartRef.current)
 
     // If we have data, set lastPrice
-    if (data.length > 0) {
-      const lastCandle = data[data.length - 1]
+    if (chartDataLocal.length > 0) {
+      const lastCandle = chartDataLocal[chartDataLocal.length - 1]
       setLastPrice(lastCandle.close)
     }
 
@@ -226,11 +262,12 @@ export default function AdvancedChart({
         resizeObserver.unobserve(containerEl)
       }
     }
-  }, [data, lastPrice])
+    // NOTE: dependency changed from "data" to "chartDataLocal"
+  }, [chartDataLocal, lastPrice])
 
   // 2) Data updates => set chart data
   useEffect(() => {
-    if (!data.length) return
+    if (!chartDataLocal.length) return
     if (
       !mainSeriesRef.current ||
       !volumeSeriesRef.current ||
@@ -239,7 +276,7 @@ export default function AdvancedChart({
       return
 
     // Candles
-    const candleData = data.map(d => ({
+    const candleData = chartDataLocal.map(d => ({
       time: d.time as unknown as UTCTimestamp,
       open: d.open,
       high: d.high,
@@ -249,7 +286,7 @@ export default function AdvancedChart({
     mainSeriesRef.current.setData(candleData)
 
     // Volume
-    const volData = data.map(d => ({
+    const volData = chartDataLocal.map(d => ({
       time: d.time as unknown as UTCTimestamp,
       value: d.volume,
       color: d.close > d.open ? '#2DBD85' : '#F6465D'
@@ -257,11 +294,11 @@ export default function AdvancedChart({
     volumeSeriesRef.current.setData(volData)
 
     // RSI
-    const rsiPts = calculateRSI(data, 14)
+    const rsiPts = calculateRSI(chartDataLocal, 14)
     rsiLineSeriesRef.current.setData(rsiPts)
-    addHorizontalLine(rsiChartRef.current, 70, '#ff0000', data)
-    addHorizontalLine(rsiChartRef.current, 30, '#00ff00', data)
-  }, [data])
+    addHorizontalLine(rsiChartRef.current, 70, '#ff0000', chartDataLocal)
+    addHorizontalLine(rsiChartRef.current, 30, '#00ff00', chartDataLocal)
+  }, [chartDataLocal])
 
   // NEW: 3) Listen for changes to userScriptCode => parse & plot user indicator
   useEffect(() => {
@@ -297,7 +334,7 @@ export default function AdvancedChart({
       }
 
       // 2) Convert your data => UTCTimestamp
-      const candleData = data.map(d => ({
+      const candleData = chartDataLocal.map(d => ({
         ...d,
         time: d.time as unknown as UTCTimestamp
       }))
@@ -318,7 +355,7 @@ export default function AdvancedChart({
     } catch (err) {
       console.error('Error running user script:', err)
     }
-  }, [userScriptCode, data])
+  }, [userScriptCode, chartDataLocal])
 
   // 3) Resize
   function handleResize() {
@@ -361,13 +398,13 @@ export default function AdvancedChart({
   }
 
   function handleDraw() {
-    if (!data.length || price == null || !mainChartRef.current) return
+    if (!chartDataLocal.length || price == null || !mainChartRef.current) return
     const lineSeries = mainChartRef.current.addLineSeries({
       color: '#ffffff',
       lineWidth: 1
     })
-    const firstTime = data[0].time as unknown as UTCTimestamp
-    const lastTime = data[data.length - 1].time as unknown as UTCTimestamp
+    const firstTime = chartDataLocal[0].time as unknown as UTCTimestamp
+    const lastTime = chartDataLocal[chartDataLocal.length - 1].time as unknown as UTCTimestamp
     lineSeries.setData([
       { time: firstTime, value: price },
       { time: lastTime, value: price }
@@ -404,6 +441,41 @@ export default function AdvancedChart({
         flexDirection: 'column'
       }}
     >
+      {/* ============================
+          NEW CODE: Symbol Button
+          ============================
+          Absolutely positioned in top-left
+          so it appears near the "☰" handle 
+          from your parent. Adjust left/top 
+          if needed.
+      */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 6,
+          left: 6,
+          zIndex: 9999,
+          backgroundColor: 'rgba(0,0,0,0.2)',
+          padding: '2px 6px',
+          borderRadius: 4
+        }}
+      >
+        <button
+          style={{
+            background: 'transparent',
+            color: '#fff',
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
+            fontSize: '0.95rem'
+          }}
+          onClick={() => setSymbolPickerOpen(true)}
+        >
+          {currentSymbol} ▼
+        </button>
+      </div>
+      {/* End NEW CODE */}
+
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div ref={mainChartContainer} style={{ flex: 1 }} />{' '}
         {/* Make it flexible */}
@@ -473,6 +545,60 @@ export default function AdvancedChart({
           ) : null}
         </p>
       </div>
+
+      {/* =========================
+          NEW CODE: Symbol Picker
+          ========================= */}
+      {symbolPickerOpen && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0,0,0,0.4)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 999999
+          }}
+          onClick={() => setSymbolPickerOpen(false)}
+        >
+          <div
+            style={{
+              background: '#88a1ac',
+              padding: 20,
+              borderRadius: 4
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3>Enter Symbol</h3>
+            <input
+              type="text"
+              value={newSymbol}
+              onChange={e => setNewSymbol(e.target.value.trim())}
+              placeholder="e.g. SBIN.NS"
+              style={{ marginRight: 6 }}
+            />
+            <button
+              onClick={() => {
+                setCurrentSymbol(newSymbol) // Triggers data fetch
+                setSymbolPickerOpen(false)  // Close popup
+              }}
+            >
+              OK
+            </button>
+            <button
+              style={{ marginLeft: 8 }}
+              onClick={() => setSymbolPickerOpen(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+      {/* End NEW CODE */}
     </div>
   )
 }
