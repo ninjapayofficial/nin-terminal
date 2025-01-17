@@ -245,7 +245,7 @@ export default function SymbolPage() {
                   {item.i === 'chartArea' && (
                     <AdvancedChart
                       data={chartData}
-                      symbol="PAYTM.NS"
+                      symbol={symbol}
                       userScriptCode={userScriptCode}
                     />
                   )}
