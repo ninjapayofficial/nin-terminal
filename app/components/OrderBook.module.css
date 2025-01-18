@@ -1,0 +1,182 @@
+/* app/components/OrderBook.module.css */
+
+.orderBookContainer {
+    position: relative; /* To position the header absolutely within */
+    /* background-color: #1e1e1e;  */
+    border-radius: 8px;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    width: 100%;
+    max-width: 600px;
+    height: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header {
+    position: absolute; /* Overlay on top of the data */
+    top: 0px;
+    left: 0px;
+    right: 1px;
+    display: flex;
+    flex-direction: row;
+    /* align-items: center; */
+    justify-content: space-between;
+    /* background-color: rgba(30, 30, 30, 0.8);  */
+    padding: 7px 20px 0px 7px;
+    border-radius: 8px;
+    z-index: 3; /* Ensure it's above other elements */
+    height: 9%; /* Occupies 10% of the container's height */
+  }
+  
+  .title {
+    font-size: 1rem;
+    font-weight: bold;
+  }
+  
+  .rangeFilter {
+    /* No label, so no additional spacing */
+  }
+  
+  .rangeFilter select {
+    padding: 0.1rem;
+    border-radius: 4px;
+    border: none;
+    background-color: #88a1ac4a;
+    color: #fff;
+    font-size: small;
+    cursor: pointer;
+  }
+  
+  .mainContent {
+    display: flex;
+    flex-direction: column;
+    height: 90%;
+    flex: 1; /* Occupies the remaining 90% of the container */
+    margin-top: 12%; 
+    margin-bottom: 1%; 
+    /* Space for the overlaid header */
+    /* margin-bottom: 10px; */
+    position: relative;
+  }
+  
+  .asksSection, .bidsSection {
+    flex: 0 0 40%; /* Each occupies 40% of the main content's height */
+   
+    margin: 0.5rem 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  
+  .asksSection {
+    flex-direction: column-reverse; /* Reverse to position best ask at bottom */
+  }
+  
+  .bidsSection {
+    flex-direction: column; /* Default column direction */
+  }
+  
+  .separatorContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 10%; /* Occupies 10% of the main content's height */
+    height: 40px; /* Adjust as needed */
+    margin: 0.5rem 0;
+  }
+  
+  .separator {
+    height: 2px;
+    background-color: #555;
+    flex: 1;
+    margin: 0 1rem;
+  }
+  
+  .bestAsk, .bestBid {
+    font-size: 0.9rem;
+    color: #dc3545; /* Red for Asks */
+    background-color: rgba(220, 53, 69, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    z-index: 2;
+    position: relative;
+  }
+  
+  .bestBid {
+    color: #28a745; /* Green for Bids */
+    background-color: rgba(40, 167, 69, 0.1);
+  }
+  
+  .orderRow {
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: 24px;
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 2px 0; /* Added margin for better spacing */
+    transition: background-color 0.3s ease;
+    z-index: 0; 
+  }
+  
+  .orderRow:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+  }
+  
+  .backgroundBar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 7px;
+    z-index: -1;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+  
+  .askBar {
+    background-color: rgba(220, 53, 69, 0.2);
+  }
+  
+  .bidBar {
+    background-color: rgba(40, 167, 69, 0.2);
+  }
+  
+  .priceText {
+    flex: 1;
+    text-align: left;
+    padding-left: 0.5rem;
+    z-index: 1;
+    position: relative;
+    font-weight: bold;
+    font-size: small;
+  }
+  
+  .amountText {
+    flex: 1;
+    text-align: right;
+    padding-right: 0.5rem;
+    z-index: 1;
+    position: relative;
+    font-size: small;
+  }
+  
+  /* Enhance Scrollbars for Better Visibility */
+  .asksSection::-webkit-scrollbar,
+  .bidsSection::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .asksSection::-webkit-scrollbar-thumb,
+  .bidsSection::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+  }
+  
+  .asksSection::-webkit-scrollbar-track,
+  .bidsSection::-webkit-scrollbar-track {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
